@@ -1,73 +1,11 @@
+import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Plus, Users, Clock, DollarSign, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface Space {
-  id: string;
-  name: string;
-  type: 'office' | 'conference' | 'coworking' | 'studio';
-  capacity: number;
-  pricePerHour: number;
-  status: 'available' | 'occupied' | 'reserved' | 'maintenance';
-  currentBooking?: {
-    client: string;
-    until: string;
-  };
-}
-
-const spaces: Space[] = [
-  {
-    id: '1',
-    name: 'Executive Office A',
-    type: 'office',
-    capacity: 4,
-    pricePerHour: 25,
-    status: 'occupied',
-    currentBooking: { client: 'MTN Cameroon', until: '6:00 PM' },
-  },
-  {
-    id: '2',
-    name: 'Conference Room Alpha',
-    type: 'conference',
-    capacity: 20,
-    pricePerHour: 50,
-    status: 'available',
-  },
-  {
-    id: '3',
-    name: 'Coworking Zone 1',
-    type: 'coworking',
-    capacity: 30,
-    pricePerHour: 10,
-    status: 'occupied',
-    currentBooking: { client: 'Various', until: '8:00 PM' },
-  },
-  {
-    id: '4',
-    name: 'Recording Studio',
-    type: 'studio',
-    capacity: 6,
-    pricePerHour: 75,
-    status: 'reserved',
-    currentBooking: { client: 'Digital Creators CM', until: '4:00 PM' },
-  },
-  {
-    id: '5',
-    name: 'Conference Room Beta',
-    type: 'conference',
-    capacity: 12,
-    pricePerHour: 35,
-    status: 'maintenance',
-  },
-  {
-    id: '6',
-    name: 'Podcast Room',
-    type: 'studio',
-    capacity: 4,
-    pricePerHour: 40,
-    status: 'available',
-  },
-];
+import { useAppStore } from '@/stores/appStore';
+import { usePermissions } from '@/hooks/usePermissions';
+import { AddBookingDialog } from '@/components/dialogs/AddBookingDialog';
+import { toast } from 'sonner';
 
 const statusConfig = {
   available: { label: 'Available', class: 'bg-success/20 text-success border-success/30' },
@@ -84,12 +22,42 @@ const typeIcons = {
 };
 
 export default function Spaces() {
-  const todayBookings = 12;
-  const occupancyRate = 78;
+  const { spaces, updateSpace } = useAppStore();
+  const { canManage } = usePermissions();
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+
+  const todayBookings = spaces.filter(s => s.status === 'occupied' || s.status === 'reserved').length;
+  const occupancyRate = Math.round((todayBookings / spaces.length) * 100);
+  const availableSpaces = spaces.filter(s => s.status === 'available').length;
+
+  const handleBookNow = (spaceId: string) => {
+    if (!canManage('spaces')) {
+      toast.error('You do not have permission to book spaces');
+      return;
+    }
+    setBookingDialogOpen(true);
+  };
+
+  const handleSetMaintenance = (spaceId: string) => {
+    if (!canManage('spaces')) {
+      toast.error('You do not have permission to manage spaces');
+      return;
+    }
+    updateSpace(spaceId, { status: 'maintenance', currentBooking: undefined });
+    toast.success('Space set to maintenance');
+  };
+
+  const handleSetAvailable = (spaceId: string) => {
+    if (!canManage('spaces')) {
+      toast.error('You do not have permission to manage spaces');
+      return;
+    }
+    updateSpace(spaceId, { status: 'available', currentBooking: undefined });
+    toast.success('Space is now available');
+  };
 
   return (
     <DashboardLayout title="Spaces Management" subtitle="Coworking, offices & room rentals">
-      {/* Header Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="flex gap-3">
           <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
@@ -97,13 +65,17 @@ export default function Spaces() {
             Calendar View
           </button>
         </div>
-        <button className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <Plus className="w-4 h-4" />
-          New Booking
-        </button>
+        {canManage('spaces') && (
+          <button 
+            onClick={() => setBookingDialogOpen(true)}
+            className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            New Booking
+          </button>
+        )}
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="glass-card p-4">
           <p className="text-sm text-muted-foreground">Today's Bookings</p>
@@ -113,10 +85,7 @@ export default function Spaces() {
           <p className="text-sm text-muted-foreground">Occupancy Rate</p>
           <p className="text-2xl font-bold text-foreground mt-1">{occupancyRate}%</p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
-              style={{ width: `${occupancyRate}%` }}
-            />
+            <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full" style={{ width: `${occupancyRate}%` }} />
           </div>
         </div>
         <div className="glass-card p-4">
@@ -125,34 +94,23 @@ export default function Spaces() {
         </div>
         <div className="glass-card p-4">
           <p className="text-sm text-muted-foreground">Available Now</p>
-          <p className="text-2xl font-bold text-success mt-1">
-            {spaces.filter(s => s.status === 'available').length} spaces
-          </p>
+          <p className="text-2xl font-bold text-success mt-1">{availableSpaces} spaces</p>
         </div>
       </div>
 
-      {/* Spaces Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {spaces.map((space) => {
           const status = statusConfig[space.status];
           return (
-            <div
-              key={space.id}
-              className="glass-card p-6 hover:border-primary/30 transition-colors cursor-pointer group"
-            >
+            <div key={space.id} className="glass-card p-6 hover:border-primary/30 transition-colors">
               <div className="flex items-start justify-between mb-4">
                 <div className="text-3xl">{typeIcons[space.type]}</div>
-                <span className={cn(
-                  'px-2.5 py-1 rounded-full text-xs font-medium border',
-                  status.class
-                )}>
+                <span className={cn('px-2.5 py-1 rounded-full text-xs font-medium border', status.class)}>
                   {status.label}
                 </span>
               </div>
 
-              <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                {space.name}
-              </h3>
+              <h3 className="font-semibold text-foreground mb-1">{space.name}</h3>
               <p className="text-sm text-muted-foreground capitalize mb-4">{space.type}</p>
 
               <div className="grid grid-cols-3 gap-3 mb-4">
@@ -174,21 +132,35 @@ export default function Spaces() {
               </div>
 
               {space.currentBooking && (
-                <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                <div className="p-3 rounded-lg bg-muted/50 border border-border/50 mb-4">
                   <p className="text-sm text-foreground font-medium">{space.currentBooking.client}</p>
                   <p className="text-xs text-muted-foreground">Until {space.currentBooking.until}</p>
                 </div>
               )}
 
-              {space.status === 'available' && (
-                <button className="w-full mt-4 h-9 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors">
+              {space.status === 'available' && canManage('spaces') && (
+                <button 
+                  onClick={() => handleBookNow(space.id)}
+                  className="w-full h-9 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors"
+                >
                   Book Now
+                </button>
+              )}
+              
+              {space.status === 'maintenance' && canManage('spaces') && (
+                <button 
+                  onClick={() => handleSetAvailable(space.id)}
+                  className="w-full h-9 bg-success/10 text-success font-medium rounded-lg hover:bg-success/20 transition-colors"
+                >
+                  Set Available
                 </button>
               )}
             </div>
           );
         })}
       </div>
+
+      <AddBookingDialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen} />
     </DashboardLayout>
   );
 }

@@ -124,8 +124,8 @@ export default function CRM() {
         ))}
       </div>
 
-      {/* Clients Table */}
-      <div className="glass-card overflow-hidden">
+      {/* Clients Table - Desktop */}
+      <div className="glass-card overflow-hidden hidden md:block">
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
@@ -189,6 +189,51 @@ export default function CRM() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Clients Cards - Mobile */}
+      <div className="space-y-4 md:hidden">
+        {clients.map((client) => (
+          <div key={client.id} className="glass-card p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center">
+                  <span className="text-sm font-semibold text-primary">
+                    {client.name.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">{client.name}</p>
+                  <p className="text-sm text-muted-foreground">{client.company}</p>
+                </div>
+              </div>
+              <button className="p-2 text-muted-foreground hover:text-foreground">
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className={typeStyles[client.type]}>{client.type}</span>
+              <span className={statusStyles[client.status]}>{client.status}</span>
+            </div>
+            
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{client.lastContact}</span>
+              <span className="font-medium text-foreground">${client.revenue.toLocaleString()}</span>
+            </div>
+            
+            <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
+              <button className="flex-1 h-9 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 flex items-center justify-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email
+              </button>
+              <button className="flex-1 h-9 bg-muted/50 text-foreground font-medium rounded-lg hover:bg-muted flex items-center justify-center gap-2">
+                <Phone className="w-4 h-4" />
+                Call
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </DashboardLayout>
   );

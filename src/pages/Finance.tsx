@@ -50,8 +50,8 @@ export default function Finance() {
   return (
     <DashboardLayout title="Finance & Invoicing" subtitle="Revenue, expenses and cash flow management">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
-        <div className="flex gap-3">
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-wrap gap-3">
           <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
             <Filter className="w-4 h-4" />
             Filter
@@ -61,7 +61,7 @@ export default function Finance() {
             Export
           </button>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button className="h-10 px-4 bg-success/10 text-success border border-success/30 font-medium rounded-lg flex items-center gap-2 hover:bg-success/20 transition-colors">
             <Plus className="w-4 h-4" />
             New Invoice
@@ -74,67 +74,67 @@ export default function Finance() {
       </div>
 
       {/* Financial Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-success" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div className="glass-card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-success/20 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-success" />
             </div>
-            <span className="flex items-center gap-1 text-sm text-success">
-              <ArrowUpRight className="w-4 h-4" />
+            <span className="flex items-center gap-1 text-xs md:text-sm text-success">
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4" />
               +18.2%
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">Total Revenue</p>
-          <p className="text-2xl font-bold text-foreground mt-1">$203,450</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Total Revenue</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$203,450</p>
         </div>
 
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-destructive/20 flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-destructive" />
+        <div className="glass-card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-destructive/20 flex items-center justify-center">
+              <TrendingDown className="w-4 h-4 md:w-5 md:h-5 text-destructive" />
             </div>
-            <span className="flex items-center gap-1 text-sm text-destructive">
-              <ArrowDownRight className="w-4 h-4" />
+            <span className="flex items-center gap-1 text-xs md:text-sm text-destructive">
+              <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4" />
               +5.1%
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">Total Expenses</p>
-          <p className="text-2xl font-bold text-foreground mt-1">$134,200</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Total Expenses</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$134,200</p>
         </div>
 
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-primary" />
+        <div className="glass-card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-primary" />
             </div>
-            <span className="flex items-center gap-1 text-sm text-success">
-              <ArrowUpRight className="w-4 h-4" />
+            <span className="flex items-center gap-1 text-xs md:text-sm text-success">
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4" />
               +22.4%
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">Net Profit</p>
-          <p className="text-2xl font-bold text-foreground mt-1">$69,250</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Net Profit</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$69,250</p>
         </div>
 
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-warning" />
+        <div className="glass-card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-warning/20 flex items-center justify-center">
+              <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-warning" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Pending Invoices</p>
-          <p className="text-2xl font-bold text-foreground mt-1">$12,800</p>
-          <p className="text-xs text-warning mt-1">4 invoices awaiting payment</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Pending Invoices</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$12,800</p>
+          <p className="text-[10px] md:text-xs text-warning mt-1">4 invoices awaiting</p>
         </div>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
         {/* Cash Flow Chart */}
-        <div className="lg:col-span-2 glass-card p-6">
+        <div className="lg:col-span-2 glass-card p-4 md:p-6">
           <h3 className="font-semibold text-foreground mb-4">Cash Flow</h3>
-          <div className="h-64">
+          <div className="h-48 md:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={cashflowData}>
                 <defs>
@@ -165,17 +165,17 @@ export default function Finance() {
         </div>
 
         {/* Revenue by Service */}
-        <div className="glass-card p-6">
+        <div className="glass-card p-4 md:p-6">
           <h3 className="font-semibold text-foreground mb-4">Revenue by Service</h3>
-          <div className="h-48">
+          <div className="h-40 md:h-48">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={revenueByService}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={70}
+                  innerRadius={40}
+                  outerRadius={60}
                   paddingAngle={2}
                   dataKey="value"
                 >
@@ -188,10 +188,10 @@ export default function Finance() {
           </div>
           <div className="space-y-2 mt-4">
             {revenueByService.map((item) => (
-              <div key={item.name} className="flex items-center justify-between text-sm">
+              <div key={item.name} className="flex items-center justify-between text-xs md:text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-muted-foreground">{item.name}</span>
+                  <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-muted-foreground truncate">{item.name}</span>
                 </div>
                 <span className="font-medium text-foreground">{item.value}%</span>
               </div>

@@ -96,27 +96,27 @@ export default function Students() {
       </div>
 
       {/* Programs Overview */}
-      <div className="glass-card p-6 mb-6">
+      <div className="glass-card p-4 md:p-6 mb-6">
         <h3 className="font-semibold text-foreground mb-4">Programs Overview</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
           {programs.map((program) => (
-            <div key={program.name} className="text-center p-4 rounded-xl bg-muted/30 border border-border/50">
+            <div key={program.name} className="text-center p-3 md:p-4 rounded-xl bg-muted/30 border border-border/50">
               <div className={cn(
-                'w-12 h-12 rounded-full mx-auto mb-3 bg-gradient-to-br flex items-center justify-center',
+                'w-10 h-10 md:w-12 md:h-12 rounded-full mx-auto mb-2 md:mb-3 bg-gradient-to-br flex items-center justify-center',
                 program.color
               )}>
-                <GraduationCap className="w-6 h-6 text-foreground" />
+                <GraduationCap className="w-5 h-5 md:w-6 md:h-6 text-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">{program.name}</p>
-              <p className="text-2xl font-bold text-foreground mt-1">{program.enrolled}</p>
-              <p className="text-xs text-muted-foreground">students</p>
+              <p className="text-xs md:text-sm font-medium text-foreground line-clamp-2">{program.name}</p>
+              <p className="text-xl md:text-2xl font-bold text-foreground mt-1">{program.enrolled}</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">students</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Students Table */}
-      <div className="glass-card overflow-hidden">
+      {/* Students Table - Desktop */}
+      <div className="glass-card overflow-hidden hidden lg:block">
         <div className="p-6 border-b border-border">
           <h3 className="font-semibold text-foreground">Current Students</h3>
         </div>
@@ -177,6 +177,63 @@ export default function Students() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Students Cards - Mobile */}
+      <div className="lg:hidden space-y-4">
+        <h3 className="font-semibold text-foreground">Current Students</h3>
+        {students.map((student) => (
+          <div key={student.id} className="glass-card p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center">
+                  <span className="text-sm font-semibold text-primary">
+                    {student.name.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">{student.name}</p>
+                  <p className="text-sm text-muted-foreground">{student.program}</p>
+                </div>
+              </div>
+              <span className={cn(
+                student.status === 'active' && 'badge-success',
+                student.status === 'completed' && 'badge-info',
+                student.status === 'pending' && 'badge-warning'
+              )}>
+                {student.status}
+              </span>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">University</span>
+                <span className="text-foreground">{student.university}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Mentor</span>
+                <span className="text-foreground">{student.mentor}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Duration</span>
+                <span className="text-foreground">{student.startDate} - {student.endDate}</span>
+              </div>
+            </div>
+            
+            <div className="mt-3 pt-3 border-t border-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">Progress</span>
+                <span className="text-sm font-medium text-foreground">{student.progress}%</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+                  style={{ width: `${student.progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </DashboardLayout>
   );

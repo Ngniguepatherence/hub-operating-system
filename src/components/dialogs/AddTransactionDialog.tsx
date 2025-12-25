@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAppStore, Transaction } from '@/stores/appStore';
+import { useAppStore } from '@/stores/appStore';
 import { toast } from 'sonner';
 
 interface AddTransactionDialogProps {
@@ -20,18 +20,40 @@ interface AddTransactionDialogProps {
   type: 'income' | 'expense';
 }
 
+// WDH-specific categories based on business services
 const categories = {
-  income: ['Media', 'Spaces', 'Students', 'Consulting', 'Other'],
-  expense: ['Equipment', 'Software', 'Salaries', 'Utilities', 'Marketing', 'Other'],
+  income: [
+    'Media Production',           // Video, audio, podcast
+    'Space Rentals',              // Coworking, offices, conference rooms
+    'Event Services',             // Event room rentals, conferences
+    'Communication & Branding',   // Corporate branding, design
+    'Student Programs',           // Training program fees
+    'Startup Support',            // Consulting, incubation fees
+    'Equipment Rental',           // Studio equipment rental
+    'Other Income'
+  ],
+  expense: [
+    'Equipment & Hardware',       // Cameras, microphones, computers
+    'Software & Subscriptions',   // Adobe, editing software
+    'Salaries & Contractors',     // Staff, freelancers
+    'Utilities & Rent',           // Electricity, internet, building rent
+    'Marketing & Advertising',    // Promotion, social media ads
+    'Office Supplies',            // General supplies
+    'Maintenance & Repairs',      // Equipment and space maintenance
+    'Training & Development',     // Staff training
+    'Other Expense'
+  ],
 };
 
 export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactionDialogProps) {
   const addTransaction = useAppStore((state) => state.addTransaction);
+  const clients = useAppStore((state) => state.clients);
   const [formData, setFormData] = React.useState({
     description: '',
     category: '',
     amount: 0,
     date: new Date().toISOString().split('T')[0],
+    clientId: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,12 +79,13 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
       category: '',
       amount: 0,
       date: new Date().toISOString().split('T')[0],
+      clientId: '',
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px] bg-card border-border">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="text-foreground">
@@ -70,19 +93,43 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
             </DialogTitle>
             <DialogDescription>
               {type === 'income' 
-                ? 'Record income from a client or service.' 
-                : 'Record a business expense for approval.'
+                ? 'Record income from WDH services: media, spaces, training, etc.' 
+                : 'Record a business expense for approval workflow.'
               }
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {type === 'income' && (
+              <div className="space-y-2">
+                <Label>Client (Optional)</Label>
+                <Select
+                  value={formData.clientId}
+                  onValueChange={(value) => setFormData({ ...formData, clientId: value })}
+                >
+                  <SelectTrigger className="bg-muted/50">
+                    <SelectValue placeholder="Select client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No client</SelectItem>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name} - {client.company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="description">Description *</Label>
               <Input
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder={type === 'income' ? 'Video production for Client X' : 'Equipment purchase'}
+                placeholder={type === 'income' 
+                  ? 'Corporate video production for MTN' 
+                  : 'Camera lens purchase'
+                }
                 className="bg-muted/50"
               />
             </div>
@@ -106,13 +153,13 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount ($) *</Label>
+                <Label htmlFor="amount">Amount (XAF) *</Label>
                 <Input
                   id="amount"
                   type="number"
                   value={formData.amount || ''}
                   onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                  placeholder="1000"
+                  placeholder="500000"
                   className="bg-muted/50"
                 />
               </div>
@@ -130,7 +177,15 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
             {type === 'expense' && (
               <div className="p-3 rounded-lg bg-warning/10 border border-warning/30">
                 <p className="text-sm text-warning">
-                  This expense will require approval from COO or CEO before processing.
+                  <strong>Workflow:</strong> This expense will be submitted for COO approval. 
+                  If amount exceeds threshold, CEO approval will also be required.
+                </p>
+              </div>
+            )}
+            {type === 'income' && (
+              <div className="p-3 rounded-lg bg-success/10 border border-success/30">
+                <p className="text-sm text-success">
+                  This income will be recorded immediately and reflected in the revenue dashboard.
                 </p>
               </div>
             )}
@@ -146,7 +201,7 @@ export function AddTransactionDialog({ open, onOpenChange, type }: AddTransactio
                 : 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
               }
             >
-              {type === 'income' ? 'Record Income' : 'Submit Expense'}
+              {type === 'income' ? 'Record Income' : 'Submit for Approval'}
             </Button>
           </DialogFooter>
         </form>

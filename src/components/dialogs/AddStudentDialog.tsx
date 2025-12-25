@@ -19,19 +19,40 @@ interface AddStudentDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// WDH Training Programs based on business services
 const programs = [
-  'Digital Marketing',
-  'Video Production',
-  'Audio Engineering',
-  'UI/UX Design',
-  'Content Creation',
+  { name: 'Digital Marketing', description: 'Social media, SEO, content strategy, analytics' },
+  { name: 'Video Production', description: 'Filming, editing, motion graphics, corporate videos' },
+  { name: 'Audio Engineering', description: 'Recording, mixing, mastering, podcast production' },
+  { name: 'UI/UX Design', description: 'User experience, interface design, prototyping' },
+  { name: 'Content Creation', description: 'Copywriting, storytelling, brand content' },
+  { name: 'Startup Mentorship', description: 'Business development, pitching, fundraising' },
+  { name: 'Communication & Branding', description: 'Corporate identity, visual communication' },
+  { name: 'Web Development', description: 'Frontend, backend, full-stack development' },
 ];
 
+// WDH Mentors
 const mentors = [
   'Sarah Mbeki',
   'Jean Fotso',
   'Eric Mboua',
   'Michel Awono',
+  'Patricia Ndam',
+  'Robert Tchana',
+];
+
+// Partner universities in Cameroon
+const universities = [
+  'University of Douala',
+  'University of Yaoundé I',
+  'University of Yaoundé II',
+  'University of Buea',
+  'University of Dschang',
+  'University of Bamenda',
+  'ESSTIC',
+  'IST Douala',
+  'Catholic University of Central Africa',
+  'Other',
 ];
 
 export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) {
@@ -42,6 +63,7 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
     phone: '',
     program: '',
     university: '',
+    customUniversity: '',
     startDate: '',
     endDate: '',
     mentor: '',
@@ -50,18 +72,25 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.program || !formData.university || !formData.startDate || !formData.endDate) {
+    if (!formData.name || !formData.email || !formData.program || !formData.startDate || !formData.endDate) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const university = formData.university === 'Other' ? formData.customUniversity : formData.university;
+    if (!university) {
+      toast.error('Please specify the university');
       return;
     }
 
     addStudent({
       ...formData,
+      university,
       startDate: new Date(formData.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       endDate: new Date(formData.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     });
     
-    toast.success('Student enrolled successfully');
+    toast.success('Student enrolled successfully! They will start in pending status.');
     onOpenChange(false);
     setFormData({
       name: '',
@@ -69,6 +98,7 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
       phone: '',
       program: '',
       university: '',
+      customUniversity: '',
       startDate: '',
       endDate: '',
       mentor: '',
@@ -76,17 +106,23 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
     });
   };
 
+  const selectedProgram = programs.find(p => p.name === formData.program);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-card border-border">
+      <DialogContent className="sm:max-w-[550px] bg-card border-border max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="text-foreground">Enroll New Student</DialogTitle>
             <DialogDescription>
-              Add a student to the training program.
+              Add a student to the "One foot in school, one foot in the professional world" program.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* Personal Information */}
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Personal Information</p>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
@@ -94,7 +130,7 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="John Doe"
+                  placeholder="Jean-Pierre Kamdem"
                   className="bg-muted/50"
                 />
               </div>
@@ -105,7 +141,7 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="john@email.com"
+                  placeholder="jp.kamdem@email.com"
                   className="bg-muted/50"
                 />
               </div>
@@ -122,53 +158,79 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="university">University *</Label>
-                <Input
-                  id="university"
+                <Label>University *</Label>
+                <Select
                   value={formData.university}
-                  onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-                  placeholder="University of Douala"
+                  onValueChange={(value) => setFormData({ ...formData, university: value })}
+                >
+                  <SelectTrigger className="bg-muted/50">
+                    <SelectValue placeholder="Select university" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {universities.map((uni) => (
+                      <SelectItem key={uni} value={uni}>
+                        {uni}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {formData.university === 'Other' && (
+              <div className="space-y-2">
+                <Label htmlFor="customUniversity">University Name *</Label>
+                <Input
+                  id="customUniversity"
+                  value={formData.customUniversity}
+                  onChange={(e) => setFormData({ ...formData, customUniversity: e.target.value })}
+                  placeholder="Enter university name"
                   className="bg-muted/50"
                 />
               </div>
+            )}
+
+            {/* Program Information */}
+            <div className="space-y-1 pt-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Program Details</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Program *</Label>
-                <Select
-                  value={formData.program}
-                  onValueChange={(value) => setFormData({ ...formData, program: value })}
-                >
-                  <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Select program" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {programs.map((program) => (
-                      <SelectItem key={program} value={program}>
-                        {program}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Mentor</Label>
-                <Select
-                  value={formData.mentor}
-                  onValueChange={(value) => setFormData({ ...formData, mentor: value })}
-                >
-                  <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Assign mentor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mentors.map((mentor) => (
-                      <SelectItem key={mentor} value={mentor}>
-                        {mentor}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label>Training Program *</Label>
+              <Select
+                value={formData.program}
+                onValueChange={(value) => setFormData({ ...formData, program: value })}
+              >
+                <SelectTrigger className="bg-muted/50">
+                  <SelectValue placeholder="Select program" />
+                </SelectTrigger>
+                <SelectContent>
+                  {programs.map((program) => (
+                    <SelectItem key={program.name} value={program.name}>
+                      {program.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedProgram && (
+                <p className="text-xs text-muted-foreground">{selectedProgram.description}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>Assigned Mentor</Label>
+              <Select
+                value={formData.mentor}
+                onValueChange={(value) => setFormData({ ...formData, mentor: value })}
+              >
+                <SelectTrigger className="bg-muted/50">
+                  <SelectValue placeholder="Assign a mentor (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mentors.map((mentor) => (
+                    <SelectItem key={mentor} value={mentor}>
+                      {mentor}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -191,6 +253,13 @@ export function AddStudentDialog({ open, onOpenChange }: AddStudentDialogProps) 
                   className="bg-muted/50"
                 />
               </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+              <p className="text-sm text-primary">
+                <strong>Program:</strong> "One foot in school, one foot in the professional world" – 
+                Students gain real-world experience while completing their education.
+              </p>
             </div>
           </div>
           <DialogFooter>

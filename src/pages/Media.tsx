@@ -136,23 +136,23 @@ export default function Media() {
       </div>
 
       {/* Workflow Visualization */}
-      <div className="glass-card p-6 mb-6">
+      <div className="glass-card p-4 md:p-6 mb-6 overflow-x-auto">
         <h3 className="font-semibold text-foreground mb-4">Media Production Workflow</h3>
-        <div className="flex items-center justify-between overflow-x-auto pb-2">
+        <div className="flex items-center justify-start md:justify-between min-w-max md:min-w-0 pb-2 gap-2">
           {workflowSteps.map((step, index) => (
             <div key={step} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
+                  'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium',
                   index < 5 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                 )}>
-                  {index < 5 ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                  {index < 5 ? <CheckCircle className="w-3 h-3 md:w-4 md:h-4" /> : index + 1}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 whitespace-nowrap">{step}</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-2 whitespace-nowrap">{step}</p>
               </div>
               {index < workflowSteps.length - 1 && (
                 <div className={cn(
-                  'w-12 h-0.5 mx-2',
+                  'w-6 md:w-12 h-0.5 mx-1 md:mx-2',
                   index < 4 ? 'bg-primary' : 'bg-muted'
                 )} />
               )}
@@ -185,14 +185,14 @@ export default function Media() {
                 <span className={cn(status.class)}>{status.label}</span>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-4 text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  {project.deadline}
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{project.deadline}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <User className="w-4 h-4" />
-                  {project.assignee}
+                  <User className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{project.assignee}</span>
                 </div>
                 <div className="flex items-center gap-2 text-foreground font-medium">
                   ${project.budget.toLocaleString()}

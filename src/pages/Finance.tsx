@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { 
   TrendingUp, 
@@ -7,10 +8,21 @@ import {
   ArrowDownRight,
   Plus,
   Download,
-  Filter
+  Filter,
+  Check,
+  X,
+  Trash2,
+  Eye,
+  FileText
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useAppStore } from '@/stores/appStore';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/contexts/AuthContext';
+import { AddTransactionDialog } from '@/components/dialogs/AddTransactionDialog';
+import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
+import { toast } from 'sonner';
 
 const cashflowData = [
   { month: 'Jan', income: 28000, expenses: 19000 },
@@ -21,56 +33,143 @@ const cashflowData = [
   { month: 'Jun', income: 38000, expenses: 24000 },
 ];
 
+// WDH Services revenue breakdown
 const revenueByService = [
-  { name: 'Media Production', value: 42, color: 'hsl(187, 92%, 50%)' },
-  { name: 'Space Rentals', value: 28, color: 'hsl(239, 84%, 67%)' },
-  { name: 'Student Programs', value: 18, color: 'hsl(142, 76%, 45%)' },
-  { name: 'Other Services', value: 12, color: 'hsl(38, 92%, 50%)' },
-];
-
-interface Transaction {
-  id: string;
-  description: string;
-  type: 'income' | 'expense';
-  category: string;
-  amount: number;
-  date: string;
-  status: 'completed' | 'pending' | 'approved';
-}
-
-const transactions: Transaction[] = [
-  { id: '1', description: 'MTN Corporate Video - Final Payment', type: 'income', category: 'Media', amount: 7500, date: 'Dec 23, 2024', status: 'completed' },
-  { id: '2', description: 'Equipment Purchase - Camera Lens', type: 'expense', category: 'Equipment', amount: 2800, date: 'Dec 22, 2024', status: 'approved' },
-  { id: '3', description: 'Conference Room Rental - Startup Hub', type: 'income', category: 'Spaces', amount: 450, date: 'Dec 22, 2024', status: 'completed' },
-  { id: '4', description: 'Software Subscriptions - Adobe Suite', type: 'expense', category: 'Software', amount: 599, date: 'Dec 21, 2024', status: 'pending' },
-  { id: '5', description: 'Podcast Production - Episode 45', type: 'income', category: 'Media', amount: 800, date: 'Dec 21, 2024', status: 'completed' },
+  { name: 'Media Production', value: 35, color: 'hsl(187, 92%, 50%)' },
+  { name: 'Space Rentals', value: 25, color: 'hsl(239, 84%, 67%)' },
+  { name: 'Student Programs', value: 15, color: 'hsl(142, 76%, 45%)' },
+  { name: 'Communication & Branding', value: 12, color: 'hsl(38, 92%, 50%)' },
+  { name: 'Startup Support', value: 8, color: 'hsl(280, 70%, 55%)' },
+  { name: 'Event Services', value: 5, color: 'hsl(0, 84%, 60%)' },
 ];
 
 export default function Finance() {
+  const { user } = useAuth();
+  const { canManage, canApproveExpenses, hasPermission } = usePermissions();
+  const { transactions, approveTransaction, deleteTransaction } = useAppStore();
+  
+  const [incomeDialogOpen, setIncomeDialogOpen] = useState(false);
+  const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'completed'>('all');
+
+  // Calculate financial stats from transactions
+  const stats = useMemo(() => {
+    const totalIncome = transactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = transactions
+      .filter(t => t.type === 'expense' && t.status !== 'pending')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const pendingExpenses = transactions
+      .filter(t => t.type === 'expense' && t.status === 'pending')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const pendingCount = transactions.filter(t => t.status === 'pending').length;
+    
+    return {
+      totalIncome,
+      totalExpenses,
+      netProfit: totalIncome - totalExpenses,
+      pendingExpenses,
+      pendingCount
+    };
+  }, [transactions]);
+
+  // Filter transactions
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      if (filterType !== 'all' && t.type !== filterType) return false;
+      if (filterStatus !== 'all' && t.status !== filterStatus) return false;
+      return true;
+    });
+  }, [transactions, filterType, filterStatus]);
+
+  const handleApprove = (id: string) => {
+    if (!canApproveExpenses()) {
+      toast.error("You don't have permission to approve expenses");
+      return;
+    }
+    const roleName = user?.role === 'ceo' ? 'CEO' : 'COO';
+    approveTransaction(id, roleName);
+    toast.success('Expense approved successfully');
+  };
+
+  const handleReject = (id: string) => {
+    if (!canApproveExpenses()) {
+      toast.error("You don't have permission to reject expenses");
+      return;
+    }
+    deleteTransaction(id);
+    toast.success('Expense rejected and removed');
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedTransaction(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedTransaction) {
+      deleteTransaction(selectedTransaction);
+      toast.success('Transaction deleted');
+      setSelectedTransaction(null);
+    }
+  };
+
+  const canManageFinance = canManage('finance');
+
   return (
     <DashboardLayout title="Finance & Invoicing" subtitle="Revenue, expenses and cash flow management">
       {/* Header Actions */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-wrap gap-3">
-          <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
-          <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as typeof filterType)}
+            className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground"
+          >
+            <option value="all">All Types</option>
+            <option value="income">Income Only</option>
+            <option value="expense">Expenses Only</option>
+          </select>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+            className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground"
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="completed">Completed</option>
+          </select>
+          <button 
+            onClick={() => toast.info('Export feature coming soon')}
+            className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2"
+          >
             <Download className="w-4 h-4" />
             Export
           </button>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <button className="h-10 px-4 bg-success/10 text-success border border-success/30 font-medium rounded-lg flex items-center gap-2 hover:bg-success/20 transition-colors">
-            <Plus className="w-4 h-4" />
-            New Invoice
-          </button>
-          <button className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <Plus className="w-4 h-4" />
-            Record Expense
-          </button>
-        </div>
+        {canManageFinance && (
+          <div className="flex flex-wrap gap-3">
+            <button 
+              onClick={() => setIncomeDialogOpen(true)}
+              className="h-10 px-4 bg-success/10 text-success border border-success/30 font-medium rounded-lg flex items-center gap-2 hover:bg-success/20 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              New Invoice
+            </button>
+            <button 
+              onClick={() => setExpenseDialogOpen(true)}
+              className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-4 h-4" />
+              Record Expense
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Financial Stats */}
@@ -86,7 +185,7 @@ export default function Finance() {
             </span>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">Total Revenue</p>
-          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$203,450</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.totalIncome.toLocaleString()}</p>
         </div>
 
         <div className="glass-card p-4 md:p-5">
@@ -100,7 +199,7 @@ export default function Finance() {
             </span>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">Total Expenses</p>
-          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$134,200</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.totalExpenses.toLocaleString()}</p>
         </div>
 
         <div className="glass-card p-4 md:p-5">
@@ -114,7 +213,7 @@ export default function Finance() {
             </span>
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">Net Profit</p>
-          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$69,250</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.netProfit.toLocaleString()}</p>
         </div>
 
         <div className="glass-card p-4 md:p-5">
@@ -123,9 +222,9 @@ export default function Finance() {
               <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-warning" />
             </div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Pending Invoices</p>
-          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">$12,800</p>
-          <p className="text-[10px] md:text-xs text-warning mt-1">4 invoices awaiting</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Pending Approval</p>
+          <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.pendingExpenses.toLocaleString()}</p>
+          <p className="text-[10px] md:text-xs text-warning mt-1">{stats.pendingCount} expenses awaiting</p>
         </div>
       </div>
 
@@ -174,8 +273,8 @@ export default function Finance() {
                   data={revenueByService}
                   cx="50%"
                   cy="50%"
-                  innerRadius={40}
-                  outerRadius={60}
+                  innerRadius={35}
+                  outerRadius={55}
                   paddingAngle={2}
                   dataKey="value"
                 >
@@ -186,11 +285,11 @@ export default function Finance() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-2 mt-4">
+          <div className="space-y-1.5 mt-4 max-h-32 overflow-y-auto">
             {revenueByService.map((item) => (
               <div key={item.name} className="flex items-center justify-between text-xs md:text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
                   <span className="text-muted-foreground truncate">{item.name}</span>
                 </div>
                 <span className="font-medium text-foreground">{item.value}%</span>
@@ -200,10 +299,71 @@ export default function Finance() {
         </div>
       </div>
 
-      {/* Recent Transactions */}
-      <div className="glass-card overflow-hidden">
+      {/* Pending Approvals - Only for CEO/COO */}
+      {canApproveExpenses() && (
+        <div className="glass-card overflow-hidden mb-6">
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            <h3 className="font-semibold text-foreground">Pending Expense Approvals</h3>
+            <span className="badge-warning">{transactions.filter(t => t.status === 'pending').length} pending</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th className="text-right">Amount</th>
+                  <th className="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.filter(t => t.status === 'pending').length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center text-muted-foreground py-8">
+                      No pending expenses to approve
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.filter(t => t.status === 'pending').map((tx) => (
+                    <tr key={tx.id}>
+                      <td className="font-medium text-foreground">{tx.description}</td>
+                      <td className="text-muted-foreground">{tx.category}</td>
+                      <td className="text-muted-foreground">{tx.date}</td>
+                      <td className="text-right font-medium text-destructive">
+                        -${tx.amount.toLocaleString()}
+                      </td>
+                      <td>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleApprove(tx.id)}
+                            className="p-2 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors"
+                            title="Approve"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleReject(tx.id)}
+                            className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                            title="Reject"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Transactions - Desktop */}
+      <div className="glass-card overflow-hidden hidden lg:block">
         <div className="p-6 border-b border-border">
-          <h3 className="font-semibold text-foreground">Recent Transactions</h3>
+          <h3 className="font-semibold text-foreground">All Transactions</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">
@@ -214,35 +374,141 @@ export default function Finance() {
                 <th>Date</th>
                 <th>Status</th>
                 <th className="text-right">Amount</th>
+                {canManageFinance && <th className="text-center">Actions</th>}
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
-                <tr key={tx.id}>
-                  <td className="font-medium text-foreground">{tx.description}</td>
-                  <td className="text-muted-foreground">{tx.category}</td>
-                  <td className="text-muted-foreground">{tx.date}</td>
-                  <td>
-                    <span className={cn(
-                      tx.status === 'completed' && 'badge-success',
-                      tx.status === 'pending' && 'badge-warning',
-                      tx.status === 'approved' && 'badge-info'
-                    )}>
-                      {tx.status}
-                    </span>
-                  </td>
-                  <td className={cn(
-                    'text-right font-medium',
-                    tx.type === 'income' ? 'text-success' : 'text-destructive'
-                  )}>
-                    {tx.type === 'income' ? '+' : '-'}${tx.amount.toLocaleString()}
+              {filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={canManageFinance ? 6 : 5} className="text-center text-muted-foreground py-8">
+                    No transactions found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredTransactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td className="font-medium text-foreground">{tx.description}</td>
+                    <td className="text-muted-foreground">{tx.category}</td>
+                    <td className="text-muted-foreground">{tx.date}</td>
+                    <td>
+                      <span className={cn(
+                        tx.status === 'completed' && 'badge-success',
+                        tx.status === 'pending' && 'badge-warning',
+                        tx.status === 'approved' && 'badge-info'
+                      )}>
+                        {tx.status}
+                        {tx.approvedBy && ` (${tx.approvedBy})`}
+                      </span>
+                    </td>
+                    <td className={cn(
+                      'text-right font-medium',
+                      tx.type === 'income' ? 'text-success' : 'text-destructive'
+                    )}>
+                      {tx.type === 'income' ? '+' : '-'}${tx.amount.toLocaleString()}
+                    </td>
+                    {canManageFinance && (
+                      <td>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleDeleteClick(tx.id)}
+                            className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Transactions Cards - Mobile */}
+      <div className="lg:hidden space-y-4">
+        <h3 className="font-semibold text-foreground">All Transactions</h3>
+        {filteredTransactions.length === 0 ? (
+          <div className="glass-card p-6 text-center text-muted-foreground">
+            No transactions found
+          </div>
+        ) : (
+          filteredTransactions.map((tx) => (
+            <div key={tx.id} className="glass-card p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">{tx.description}</p>
+                  <p className="text-sm text-muted-foreground">{tx.category}</p>
+                </div>
+                <span className={cn(
+                  tx.status === 'completed' && 'badge-success',
+                  tx.status === 'pending' && 'badge-warning',
+                  tx.status === 'approved' && 'badge-info'
+                )}>
+                  {tx.status}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                <span className="text-sm text-muted-foreground">{tx.date}</span>
+                <span className={cn(
+                  'font-semibold',
+                  tx.type === 'income' ? 'text-success' : 'text-destructive'
+                )}>
+                  {tx.type === 'income' ? '+' : '-'}${tx.amount.toLocaleString()}
+                </span>
+              </div>
+              {canManageFinance && (
+                <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
+                  {tx.status === 'pending' && canApproveExpenses() && (
+                    <>
+                      <button
+                        onClick={() => handleApprove(tx.id)}
+                        className="flex-1 py-2 rounded-lg bg-success/10 text-success text-sm font-medium hover:bg-success/20"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(tx.id)}
+                        className="flex-1 py-2 rounded-lg bg-destructive/10 text-destructive text-sm font-medium hover:bg-destructive/20"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => handleDeleteClick(tx.id)}
+                    className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Dialogs */}
+      <AddTransactionDialog
+        open={incomeDialogOpen}
+        onOpenChange={setIncomeDialogOpen}
+        type="income"
+      />
+      <AddTransactionDialog
+        open={expenseDialogOpen}
+        onOpenChange={setExpenseDialogOpen}
+        type="expense"
+      />
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Transaction"
+        description="Are you sure you want to delete this transaction? This action cannot be undone."
+        onConfirm={confirmDelete}
+        variant="destructive"
+      />
     </DashboardLayout>
   );
 }

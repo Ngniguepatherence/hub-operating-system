@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   LayoutDashboard,
   Users,
@@ -22,91 +23,92 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
   href: string;
   roles: UserRole[];
-  children?: { label: string; href: string; icon: React.ElementType }[];
+  children?: { labelKey: string; href: string; icon: React.ElementType }[];
 }
 
 const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     icon: LayoutDashboard,
     href: '/dashboard',
     roles: ['ceo', 'coo', 'cto', 'media_manager', 'admin'],
   },
   {
-    label: 'CRM',
+    labelKey: 'nav.crm',
     icon: Users,
     href: '/crm',
     roles: ['ceo', 'coo', 'admin'],
   },
   {
-    label: 'Spaces',
+    labelKey: 'nav.spaces',
     icon: Building2,
     href: '/spaces',
     roles: ['ceo', 'coo', 'admin'],
   },
   {
-    label: 'Media Production',
+    labelKey: 'nav.media',
     icon: Video,
     href: '/media',
     roles: ['ceo', 'coo', 'media_manager'],
     children: [
-      { label: 'Audio', href: '/media/audio', icon: Headphones },
-      { label: 'Video', href: '/media/video', icon: Film },
-      { label: 'Podcasts', href: '/media/podcasts', icon: Mic },
+      { labelKey: 'nav.audio', href: '/media/audio', icon: Headphones },
+      { labelKey: 'nav.video', href: '/media/video', icon: Film },
+      { labelKey: 'nav.podcasts', href: '/media/podcasts', icon: Mic },
     ],
   },
   {
-    label: 'Student Programs',
+    labelKey: 'nav.students',
     icon: GraduationCap,
     href: '/students',
     roles: ['ceo', 'coo', 'admin'],
   },
   {
-    label: 'Finance',
+    labelKey: 'nav.finance',
     icon: DollarSign,
     href: '/finance',
     roles: ['ceo', 'coo'],
   },
   {
-    label: 'HR & Team',
+    labelKey: 'nav.hr',
     icon: UserCog,
     href: '/hr',
     roles: ['ceo', 'coo', 'cto'],
   },
   {
-    label: 'Documents',
+    labelKey: 'nav.documents',
     icon: FileText,
     href: '/documents',
     roles: ['ceo', 'coo', 'cto', 'admin'],
   },
   {
-    label: 'Notifications',
+    labelKey: 'nav.notifications',
     icon: Bell,
     href: '/notifications',
     roles: ['ceo', 'coo', 'cto', 'media_manager', 'admin'],
   },
   {
-    label: 'Settings',
+    labelKey: 'nav.settings',
     icon: Settings,
     href: '/settings',
-    roles: ['cto'],
+    roles: ['ceo', 'coo', 'cto'],
   },
 ];
 
 export function Sidebar() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
-  const toggleExpanded = (label: string) => {
+  const toggleExpanded = (labelKey: string) => {
     setExpandedItems(prev =>
-      prev.includes(label)
-        ? prev.filter(item => item !== label)
-        : [...prev, label]
+      prev.includes(labelKey)
+        ? prev.filter(item => item !== labelKey)
+        : [...prev, labelKey]
     );
   };
 
@@ -126,12 +128,12 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border flex-col hidden lg:flex">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
           <Building2 className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
           <h1 className="font-bold text-foreground">WDH-OS</h1>
-          <p className="text-xs text-muted-foreground">Operating System</p>
+          <p className="text-xs text-muted-foreground">West Digital Hub</p>
         </div>
       </div>
 
@@ -141,15 +143,15 @@ export function Sidebar() {
           {filteredNavItems.map((item) => {
             const isActive = location.pathname === item.href || 
               location.pathname.startsWith(item.href + '/');
-            const isExpanded = expandedItems.includes(item.label);
+            const isExpanded = expandedItems.includes(item.labelKey);
             const hasChildren = item.children && item.children.length > 0;
 
             return (
-              <li key={item.label}>
+              <li key={item.labelKey}>
                 {hasChildren ? (
                   <>
                     <button
-                      onClick={() => toggleExpanded(item.label)}
+                      onClick={() => toggleExpanded(item.labelKey)}
                       className={cn(
                         'sidebar-link w-full justify-between',
                         isActive && 'active'
@@ -157,7 +159,7 @@ export function Sidebar() {
                     >
                       <span className="flex items-center gap-3">
                         <item.icon className="w-5 h-5" />
-                        {item.label}
+                        {t(item.labelKey)}
                       </span>
                       <ChevronDown
                         className={cn(
@@ -178,7 +180,7 @@ export function Sidebar() {
                               )}
                             >
                               <child.icon className="w-4 h-4" />
-                              {child.label}
+                              {t(child.labelKey)}
                             </Link>
                           </li>
                         ))}
@@ -191,7 +193,7 @@ export function Sidebar() {
                     className={cn('sidebar-link', isActive && 'active')}
                   >
                     <item.icon className="w-5 h-5" />
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 )}
               </li>
@@ -203,7 +205,7 @@ export function Sidebar() {
       {/* User Profile */}
       <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center">
             <span className="text-sm font-semibold text-primary">
               {user?.name?.charAt(0) || 'U'}
             </span>
@@ -222,7 +224,7 @@ export function Sidebar() {
           className="sidebar-link w-full text-destructive hover:text-destructive hover:bg-destructive/10"
         >
           <LogOut className="w-5 h-5" />
-          Sign Out
+          {t('common.logout')}
         </button>
       </div>
     </aside>

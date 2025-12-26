@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CRM from "./pages/CRM";
@@ -11,6 +12,10 @@ import Spaces from "./pages/Spaces";
 import Media from "./pages/Media";
 import Finance from "./pages/Finance";
 import Students from "./pages/Students";
+import HR from "./pages/HR";
+import Documents from "./pages/Documents";
+import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +71,22 @@ function AppRoutes() {
         path="/finance" 
         element={<ProtectedRoute><Finance /></ProtectedRoute>} 
       />
+      <Route 
+        path="/hr" 
+        element={<ProtectedRoute><HR /></ProtectedRoute>} 
+      />
+      <Route 
+        path="/documents" 
+        element={<ProtectedRoute><Documents /></ProtectedRoute>} 
+      />
+      <Route 
+        path="/settings" 
+        element={<ProtectedRoute><Settings /></ProtectedRoute>} 
+      />
+      <Route 
+        path="/notifications" 
+        element={<ProtectedRoute><Notifications /></ProtectedRoute>} 
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -73,15 +94,17 @@ function AppRoutes() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

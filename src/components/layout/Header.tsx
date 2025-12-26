@@ -1,5 +1,14 @@
-import { Bell, Search, Settings, Menu } from 'lucide-react';
+import { Bell, Search, Settings, Menu, Globe } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Link } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   title: string;
@@ -9,6 +18,7 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
   const { user } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border px-4 md:px-8 py-4">
@@ -36,21 +46,44 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder={t('common.search')}
               className="w-48 lg:w-64 h-10 pl-10 pr-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
 
+          {/* Language Switcher */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Globe className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => setLanguage('fr')}
+                className={language === 'fr' ? 'bg-primary/10 text-primary' : ''}
+              >
+                🇫🇷 Français
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setLanguage('en')}
+                className={language === 'en' ? 'bg-primary/10 text-primary' : ''}
+              >
+                🇬🇧 English
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Notifications */}
-          <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors">
+          <Link to="/notifications" className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
-          </button>
+          </Link>
 
           {/* Settings - hidden on small screens */}
-          <button className="hidden sm:flex p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors">
+          <Link to="/settings" className="hidden sm:flex p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors">
             <Settings className="w-5 h-5" />
-          </button>
+          </Link>
 
           {/* User Avatar */}
           <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center cursor-pointer">

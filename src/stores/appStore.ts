@@ -90,6 +90,42 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  position: string;
+  department: string;
+  salary: number;
+  joinDate: string;
+  status: 'active' | 'on_leave' | 'inactive';
+  performance: 'excellent' | 'good' | 'average' | 'needs_improvement';
+}
+
+export interface Department {
+  id: string;
+  name: string;
+  headCount: number;
+}
+
+export interface Document {
+  id: string;
+  name: string;
+  category: string;
+  type: string;
+  size: number;
+  uploadedBy: string;
+  uploadDate: string;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  category: string;
+  count: number;
+}
+
 // Initial data
 const initialClients: Client[] = [
   {
@@ -298,6 +334,44 @@ const initialNotifications: Notification[] = [
   { id: '3', title: 'Project Completed', message: 'Radio Ad Campaign ready for delivery', type: 'success', read: true, createdAt: '2024-12-24T15:00:00Z' },
 ];
 
+const initialEmployees: Employee[] = [
+  { id: '1', name: 'Jean-Pierre Kamdem', email: 'jp@westdigitalhub.com', phone: '+237 699 111 111', position: 'Directeur', department: 'Direction', salary: 800000, joinDate: 'Jan 2022', status: 'active', performance: 'excellent' },
+  { id: '2', name: 'Marie Nguefack', email: 'marie@westdigitalhub.com', phone: '+237 699 222 222', position: 'Manager', department: 'Production Média', salary: 500000, joinDate: 'Mar 2022', status: 'active', performance: 'good' },
+  { id: '3', name: 'Paul Mbarga', email: 'paul@westdigitalhub.com', phone: '+237 699 333 333', position: 'Développeur', department: 'Tech & Dev', salary: 450000, joinDate: 'Jun 2023', status: 'active', performance: 'excellent' },
+  { id: '4', name: 'Aisha Bello', email: 'aisha@westdigitalhub.com', phone: '+237 699 444 444', position: 'Designer', department: 'Design & Branding', salary: 400000, joinDate: 'Sep 2023', status: 'active', performance: 'good' },
+  { id: '5', name: 'Emmanuel Fotso', email: 'emmanuel@westdigitalhub.com', phone: '+237 699 555 555', position: 'Ingénieur Audio', department: 'Production Média', salary: 380000, joinDate: 'Nov 2023', status: 'on_leave', performance: 'average' },
+  { id: '6', name: 'Grace Njoya', email: 'grace@westdigitalhub.com', phone: '+237 699 666 666', position: 'Community Manager', department: 'Marketing Digital', salary: 350000, joinDate: 'Feb 2024', status: 'active', performance: 'good' },
+];
+
+const initialDepartments: Department[] = [
+  { id: '1', name: 'Direction', headCount: 2 },
+  { id: '2', name: 'Production Média', headCount: 5 },
+  { id: '3', name: 'Tech & Dev', headCount: 4 },
+  { id: '4', name: 'Design & Branding', headCount: 3 },
+  { id: '5', name: 'Marketing Digital', headCount: 3 },
+  { id: '6', name: 'Formation & Académie', headCount: 2 },
+  { id: '7', name: 'Espaces & Coworking', headCount: 2 },
+  { id: '8', name: 'Finance & Admin', headCount: 2 },
+];
+
+const initialDocuments: Document[] = [
+  { id: '1', name: 'Contrat MTN Cameroon 2024', category: 'contracts', type: 'pdf', size: 245678, uploadedBy: 'Jean-Pierre Kamdem', uploadDate: '22 Dec 2024' },
+  { id: '2', name: 'Facture Production Vidéo #2024-089', category: 'invoices', type: 'pdf', size: 128456, uploadedBy: 'Marie Nguefack', uploadDate: '21 Dec 2024' },
+  { id: '3', name: 'Rapport Financier Q4 2024', category: 'reports', type: 'xlsx', size: 456789, uploadedBy: 'Emmanuel Fotso', uploadDate: '20 Dec 2024' },
+  { id: '4', name: 'Template Brief Projet', category: 'templates', type: 'docx', size: 89012, uploadedBy: 'Paul Mbarga', uploadDate: '19 Dec 2024' },
+  { id: '5', name: 'Charte Graphique WDH', category: 'policies', type: 'pdf', size: 1234567, uploadedBy: 'Aisha Bello', uploadDate: '18 Dec 2024' },
+  { id: '6', name: 'Logo WDH Officiel', category: 'other', type: 'png', size: 567890, uploadedBy: 'Aisha Bello', uploadDate: '17 Dec 2024' },
+];
+
+const initialFolders: Folder[] = [
+  { id: '1', name: 'Contrats', category: 'contracts', count: 12 },
+  { id: '2', name: 'Factures', category: 'invoices', count: 45 },
+  { id: '3', name: 'Rapports', category: 'reports', count: 8 },
+  { id: '4', name: 'Templates', category: 'templates', count: 15 },
+  { id: '5', name: 'Politiques', category: 'policies', count: 6 },
+  { id: '6', name: 'Autres', category: 'other', count: 23 },
+];
+
 // Store interface
 interface AppState {
   // Data
@@ -308,6 +382,10 @@ interface AppState {
   students: Student[];
   transactions: Transaction[];
   notifications: Notification[];
+  employees: Employee[];
+  departments: Department[];
+  documents: Document[];
+  folders: Folder[];
 
   // Client actions
   addClient: (client: Omit<Client, 'id' | 'createdAt' | 'lastContact'>) => void;
@@ -342,6 +420,15 @@ interface AppState {
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   addNotification: (notification: Omit<Notification, 'id' | 'createdAt' | 'read'>) => void;
+
+  // Employee actions
+  addEmployee: (employee: Omit<Employee, 'id'>) => void;
+  updateEmployee: (id: string, updates: Partial<Employee>) => void;
+  deleteEmployee: (id: string) => void;
+
+  // Document actions
+  addDocument: (document: Omit<Document, 'id'>) => void;
+  deleteDocument: (id: string) => void;
 }
 
 // Generate unique ID
@@ -356,6 +443,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   students: initialStudents,
   transactions: initialTransactions,
   notifications: initialNotifications,
+  employees: initialEmployees,
+  departments: initialDepartments,
+  documents: initialDocuments,
+  folders: initialFolders,
 
   // Client actions
   addClient: (client) => {
@@ -616,5 +707,67 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       notifications: [newNotification, ...state.notifications],
     }));
+  },
+
+  // Employee actions
+  addEmployee: (employee) => {
+    const newEmployee: Employee = {
+      ...employee,
+      id: generateId(),
+    };
+    set((state) => ({ employees: [...state.employees, newEmployee] }));
+    get().addNotification({
+      title: 'Nouvel Employé',
+      message: `${newEmployee.name} a rejoint l'équipe`,
+      type: 'success',
+    });
+  },
+
+  updateEmployee: (id, updates) => {
+    set((state) => ({
+      employees: state.employees.map((e) => (e.id === id ? { ...e, ...updates } : e)),
+    }));
+  },
+
+  deleteEmployee: (id) => {
+    const employee = get().employees.find((e) => e.id === id);
+    set((state) => ({
+      employees: state.employees.filter((e) => e.id !== id),
+    }));
+    if (employee) {
+      get().addNotification({
+        title: 'Employé Supprimé',
+        message: `${employee.name} a été retiré de l'équipe`,
+        type: 'info',
+      });
+    }
+  },
+
+  // Document actions
+  addDocument: (document) => {
+    const newDocument: Document = {
+      ...document,
+      id: generateId(),
+    };
+    set((state) => ({ documents: [...state.documents, newDocument] }));
+    get().addNotification({
+      title: 'Document Ajouté',
+      message: `${newDocument.name} a été uploadé`,
+      type: 'success',
+    });
+  },
+
+  deleteDocument: (id) => {
+    const document = get().documents.find((d) => d.id === id);
+    set((state) => ({
+      documents: state.documents.filter((d) => d.id !== id),
+    }));
+    if (document) {
+      get().addNotification({
+        title: 'Document Supprimé',
+        message: `${document.name} a été supprimé`,
+        type: 'info',
+      });
+    }
   },
 }));

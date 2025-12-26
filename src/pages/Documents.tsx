@@ -20,7 +20,6 @@ import {
   File,
   FileSpreadsheet,
   FileImage,
-  FilePdf,
   MoreHorizontal,
   FolderOpen
 } from 'lucide-react';
@@ -60,7 +59,7 @@ export default function Documents() {
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'pdf':
-        return <FilePdf className="w-8 h-8 text-destructive" />;
+        return <FileText className="w-8 h-8 text-destructive" />;
       case 'xlsx':
       case 'xls':
         return <FileSpreadsheet className="w-8 h-8 text-success" />;

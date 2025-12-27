@@ -4,24 +4,12 @@ import { Plus, Users, Clock, DollarSign, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { AddBookingDialog } from '@/components/dialogs/AddBookingDialog';
 import { toast } from 'sonner';
 
-const statusConfig = {
-  available: { label: 'Available', class: 'bg-success/20 text-success border-success/30' },
-  occupied: { label: 'Occupied', class: 'bg-destructive/20 text-destructive border-destructive/30' },
-  reserved: { label: 'Reserved', class: 'bg-warning/20 text-warning border-warning/30' },
-  maintenance: { label: 'Maintenance', class: 'bg-muted text-muted-foreground border-border' },
-};
-
-const typeIcons = {
-  office: '🏢',
-  conference: '👥',
-  coworking: '💻',
-  studio: '🎙️',
-};
-
 export default function Spaces() {
+  const { t } = useLanguage();
   const { spaces, updateSpace } = useAppStore();
   const { canManage } = usePermissions();
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
@@ -30,9 +18,33 @@ export default function Spaces() {
   const occupancyRate = Math.round((todayBookings / spaces.length) * 100);
   const availableSpaces = spaces.filter(s => s.status === 'available').length;
 
+  const statusConfig: Record<string, { label: string; class: string }> = {
+    available: { label: t('spaces.available'), class: 'bg-success/20 text-success border-success/30' },
+    occupied: { label: t('spaces.occupied'), class: 'bg-destructive/20 text-destructive border-destructive/30' },
+    reserved: { label: t('spaces.reserved'), class: 'bg-warning/20 text-warning border-warning/30' },
+    maintenance: { label: t('spaces.maintenance'), class: 'bg-muted text-muted-foreground border-border' },
+  };
+
+  const typeIcons: Record<string, string> = {
+    office: '🏢',
+    conference: '👥',
+    coworking: '💻',
+    studio: '🎙️',
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'office': return t('spaces.office');
+      case 'conference': return t('spaces.conference');
+      case 'coworking': return t('spaces.coworking');
+      case 'studio': return t('spaces.studio');
+      default: return type;
+    }
+  };
+
   const handleBookNow = (spaceId: string) => {
     if (!canManage('spaces')) {
-      toast.error('You do not have permission to book spaces');
+      toast.error(t('media.noPermission'));
       return;
     }
     setBookingDialogOpen(true);
@@ -40,29 +52,29 @@ export default function Spaces() {
 
   const handleSetMaintenance = (spaceId: string) => {
     if (!canManage('spaces')) {
-      toast.error('You do not have permission to manage spaces');
+      toast.error(t('media.noPermission'));
       return;
     }
     updateSpace(spaceId, { status: 'maintenance', currentBooking: undefined });
-    toast.success('Space set to maintenance');
+    toast.success(t('common.success'));
   };
 
   const handleSetAvailable = (spaceId: string) => {
     if (!canManage('spaces')) {
-      toast.error('You do not have permission to manage spaces');
+      toast.error(t('media.noPermission'));
       return;
     }
     updateSpace(spaceId, { status: 'available', currentBooking: undefined });
-    toast.success('Space is now available');
+    toast.success(t('common.success'));
   };
 
   return (
-    <DashboardLayout title="Spaces Management" subtitle="Coworking, offices & room rentals">
+    <DashboardLayout title={t('spaces.title')} subtitle={t('spaces.subtitle')}>
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="flex gap-3">
           <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            Calendar View
+            {t('spaces.calendarView')}
           </button>
         </div>
         {canManage('spaces') && (
@@ -71,30 +83,30 @@ export default function Spaces() {
             className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
-            New Booking
+            {t('spaces.newBooking')}
           </button>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Today's Bookings</p>
+          <p className="text-sm text-muted-foreground">{t('spaces.todaysBookings')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{todayBookings}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Occupancy Rate</p>
+          <p className="text-sm text-muted-foreground">{t('spaces.occupancyRate')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{occupancyRate}%</p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full" style={{ width: `${occupancyRate}%` }} />
           </div>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Revenue Today</p>
+          <p className="text-sm text-muted-foreground">{t('spaces.revenueToday')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">$1,245</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Available Now</p>
-          <p className="text-2xl font-bold text-success mt-1">{availableSpaces} spaces</p>
+          <p className="text-sm text-muted-foreground">{t('spaces.availableNow')}</p>
+          <p className="text-2xl font-bold text-success mt-1">{availableSpaces} {t('spaces.studio').toLowerCase()}s</p>
         </div>
       </div>
 
@@ -111,30 +123,30 @@ export default function Spaces() {
               </div>
 
               <h3 className="font-semibold text-foreground mb-1">{space.name}</h3>
-              <p className="text-sm text-muted-foreground capitalize mb-4">{space.type}</p>
+              <p className="text-sm text-muted-foreground capitalize mb-4">{getTypeLabel(space.type)}</p>
 
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div className="text-center p-2 rounded-lg bg-muted/30">
                   <Users className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
                   <p className="text-sm font-medium text-foreground">{space.capacity}</p>
-                  <p className="text-xs text-muted-foreground">Capacity</p>
+                  <p className="text-xs text-muted-foreground">{t('spaces.capacity')}</p>
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/30">
                   <DollarSign className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
                   <p className="text-sm font-medium text-foreground">${space.pricePerHour}</p>
-                  <p className="text-xs text-muted-foreground">/hour</p>
+                  <p className="text-xs text-muted-foreground">/h</p>
                 </div>
                 <div className="text-center p-2 rounded-lg bg-muted/30">
                   <Clock className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
                   <p className="text-sm font-medium text-foreground">24/7</p>
-                  <p className="text-xs text-muted-foreground">Access</p>
+                  <p className="text-xs text-muted-foreground">{t('spaces.access')}</p>
                 </div>
               </div>
 
               {space.currentBooking && (
                 <div className="p-3 rounded-lg bg-muted/50 border border-border/50 mb-4">
                   <p className="text-sm text-foreground font-medium">{space.currentBooking.client}</p>
-                  <p className="text-xs text-muted-foreground">Until {space.currentBooking.until}</p>
+                  <p className="text-xs text-muted-foreground">{t('spaces.until')} {space.currentBooking.until}</p>
                 </div>
               )}
 
@@ -143,7 +155,7 @@ export default function Spaces() {
                   onClick={() => handleBookNow(space.id)}
                   className="w-full h-9 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors"
                 >
-                  Book Now
+                  {t('spaces.bookNow')}
                 </button>
               )}
               
@@ -152,7 +164,7 @@ export default function Spaces() {
                   onClick={() => handleSetAvailable(space.id)}
                   className="w-full h-9 bg-success/10 text-success font-medium rounded-lg hover:bg-success/20 transition-colors"
                 >
-                  Set Available
+                  {t('spaces.setAvailable')}
                 </button>
               )}
             </div>

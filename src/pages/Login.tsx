@@ -1,18 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Building2, Lock, Mail, ChevronRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const roles: { value: UserRole; label: string; description: string }[] = [
-  { value: 'ceo', label: 'CEO', description: 'Strategic Admin - Full access' },
-  { value: 'coo', label: 'COO', description: 'Operational Admin' },
-  { value: 'cto', label: 'CTO', description: 'Technical Admin' },
-  { value: 'media_manager', label: 'Media Manager', description: 'Media Production' },
-  { value: 'admin', label: 'Admin', description: 'Secretariat' },
-];
-
 export default function Login() {
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('ceo');
@@ -21,6 +15,14 @@ export default function Login() {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const roles: { value: UserRole; label: string; description: string }[] = [
+    { value: 'ceo', label: 'CEO', description: t('roles.fullAccess') },
+    { value: 'coo', label: 'COO', description: t('roles.chiefOperations') },
+    { value: 'cto', label: 'CTO', description: t('roles.chiefTechnology') },
+    { value: 'media_manager', label: t('roles.mediaManager'), description: t('nav.mediaProduction') },
+    { value: 'admin', label: 'Admin', description: t('roles.administration') },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ export default function Login() {
       await login(email, password, selectedRole);
       navigate('/dashboard');
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      setError(t('auth.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }
@@ -51,22 +53,26 @@ export default function Login() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">WDH-OS</h1>
-              <p className="text-sm text-muted-foreground">Operating System</p>
+              <p className="text-sm text-muted-foreground">{t('nav.operatingSystem')}</p>
             </div>
           </div>
 
           <div className="space-y-6">
             <h2 className="text-4xl font-bold text-foreground leading-tight">
               West Digital Hub
-              <span className="block gradient-text">Operating System</span>
+              <span className="block gradient-text">{t('nav.operatingSystem')}</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-md">
-              The centralized platform powering all operations, from CRM to media production, 
-              designed to make West Digital Hub function like a machine.
+              {t('wdh.description')}
             </p>
 
             <div className="grid grid-cols-2 gap-4 pt-6">
-              {['CRM & Clients', 'Space Management', 'Media Production', 'Finance & HR'].map((feature) => (
+              {[
+                t('wdh.features.crmClients'), 
+                t('wdh.features.spaceManagement'), 
+                t('wdh.features.mediaProduction'), 
+                t('wdh.features.financeHr')
+              ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                   {feature}
@@ -76,7 +82,7 @@ export default function Login() {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            © 2024 West Digital Hub. All rights reserved.
+            {t('wdh.copyright')}
           </p>
         </div>
       </div>
@@ -91,14 +97,14 @@ export default function Login() {
               </div>
               <h1 className="text-xl font-bold text-foreground">WDH-OS</h1>
             </div>
-            <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
-            <p className="text-muted-foreground mt-2">Sign in to access your dashboard</p>
+            <h2 className="text-2xl font-bold text-foreground">{t('auth.welcomeBack')}</h2>
+            <p className="text-muted-foreground mt-2">{t('auth.signInAccess')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Role Selection */}
             <div className="space-y-3">
-              <label className="text-sm font-medium text-foreground">Select Role</label>
+              <label className="text-sm font-medium text-foreground">{t('auth.selectRole')}</label>
               <div className="grid grid-cols-2 gap-2">
                 {roles.map((role) => (
                   <button
@@ -122,7 +128,7 @@ export default function Login() {
             {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-foreground">
-                Email
+                {t('common.email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -141,7 +147,7 @@ export default function Login() {
             {/* Password */}
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-foreground">
-                Password
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -172,7 +178,7 @@ export default function Login() {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  Sign In
+                  {t('auth.signIn')}
                   <ChevronRight className="w-5 h-5" />
                 </>
               )}
@@ -180,7 +186,7 @@ export default function Login() {
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Demo: Enter any email and password to continue
+            {t('auth.demoInfo')}
           </p>
         </div>
       </div>

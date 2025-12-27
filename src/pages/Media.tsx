@@ -1,52 +1,73 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Plus, Filter, Calendar, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { Plus, Filter, Calendar, User, ArrowRight, CheckCircle, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { AddProjectDialog } from '@/components/dialogs/AddProjectDialog';
 import { toast } from 'sonner';
 
-const typeConfig = {
-  video: { emoji: '🎬', color: 'text-info' },
-  audio: { emoji: '🎵', color: 'text-success' },
-  podcast: { emoji: '🎙️', color: 'text-warning' },
-};
-
-const statusConfig = {
-  briefing: { label: 'Briefing', class: 'badge-muted' },
-  quote: { label: 'Quote Pending', class: 'badge-warning' },
-  production: { label: 'In Production', class: 'badge-info' },
-  review: { label: 'Client Review', class: 'badge-warning' },
-  delivery: { label: 'Ready for Delivery', class: 'badge-success' },
-  completed: { label: 'Completed', class: 'badge-success' },
-};
-
-const workflowSteps = ['Client Request', 'Quote', 'Approval', 'Deposit', 'Production', 'Delivery', 'Invoice', 'Archive'];
-
 export default function Media() {
-  const { projects, advanceProjectStatus } = useAppStore();
+  const { t } = useLanguage();
+  const { projects, advanceProjectStatus, updateProject } = useAppStore();
   const { canManage } = usePermissions();
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
 
+  const typeConfig: Record<string, { emoji: string; color: string }> = {
+    video: { emoji: '🎬', color: 'text-info' },
+    audio: { emoji: '🎵', color: 'text-success' },
+    podcast: { emoji: '🎙️', color: 'text-warning' },
+  };
+
+  const statusConfig: Record<string, { label: string; class: string }> = {
+    briefing: { label: t('media.briefing'), class: 'badge-muted' },
+    quote: { label: t('media.quotePending'), class: 'badge-warning' },
+    production: { label: t('media.inProduction'), class: 'badge-info' },
+    review: { label: t('media.review'), class: 'badge-warning' },
+    delivery: { label: t('media.delivery'), class: 'badge-success' },
+    completed: { label: t('common.completed'), class: 'badge-success' },
+  };
+
+  const workflowSteps = [
+    t('media.clientRequest'), 
+    t('media.quote'), 
+    t('media.approval'), 
+    t('media.deposit'), 
+    t('media.production'), 
+    t('media.delivery'), 
+    t('media.invoice'), 
+    t('media.archive')
+  ];
+
   const handleAdvanceStatus = (projectId: string) => {
     if (!canManage('media')) {
-      toast.error('You do not have permission to manage projects');
+      toast.error(t('media.noPermission'));
       return;
     }
     advanceProjectStatus(projectId);
+    toast.success(t('media.statusAdvanced'));
+  };
+
+  const handleMarkComplete = (projectId: string) => {
+    if (!canManage('media')) {
+      toast.error(t('media.noPermission'));
+      return;
+    }
+    updateProject(projectId, { status: 'completed', progress: 100 });
+    toast.success(t('media.projectCompleted'));
   };
 
   const activeProjects = projects.filter(p => p.status !== 'completed').length;
   const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
 
   return (
-    <DashboardLayout title="Media Production" subtitle="Audio, video & podcast management">
+    <DashboardLayout title={t('media.title')} subtitle={t('media.subtitle')}>
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="flex gap-3">
           <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
             <Filter className="w-4 h-4" />
-            Filter by Type
+            {t('media.filterByType')}
           </button>
         </div>
         {canManage('media') && (
@@ -55,32 +76,32 @@ export default function Media() {
             className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
-            New Project
+            {t('media.newProject')}
           </button>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Active Projects</p>
+          <p className="text-sm text-muted-foreground">{t('media.activeProjects')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{activeProjects}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Total Budget</p>
+          <p className="text-sm text-muted-foreground">{t('media.totalBudget')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">${totalBudget.toLocaleString()}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Avg. Completion Time</p>
-          <p className="text-2xl font-bold text-foreground mt-1">12 days</p>
+          <p className="text-sm text-muted-foreground">{t('media.avgCompletionTime')}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">12 {t('media.days')}</p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-sm text-muted-foreground">Due This Week</p>
-          <p className="text-2xl font-bold text-warning mt-1">3 projects</p>
+          <p className="text-sm text-muted-foreground">{t('media.dueThisWeek')}</p>
+          <p className="text-2xl font-bold text-warning mt-1">3 {t('media.projects')}</p>
         </div>
       </div>
 
       <div className="glass-card p-4 md:p-6 mb-6 overflow-x-auto">
-        <h3 className="font-semibold text-foreground mb-4">Media Production Workflow</h3>
+        <h3 className="font-semibold text-foreground mb-4">{t('media.workflowTitle')}</h3>
         <div className="flex items-center justify-start md:justify-between min-w-max md:min-w-0 pb-2 gap-2">
           {workflowSteps.map((step, index) => (
             <div key={step} className="flex items-center">
@@ -98,8 +119,8 @@ export default function Media() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {projects.map((project) => {
-          const type = typeConfig[project.type];
-          const status = statusConfig[project.status];
+          const type = typeConfig[project.type] || { emoji: '📁', color: 'text-muted-foreground' };
+          const status = statusConfig[project.status] || { label: project.status, class: 'badge-muted' };
           
           return (
             <div key={project.id} className="glass-card p-6 hover:border-primary/30 transition-colors">
@@ -130,7 +151,7 @@ export default function Media() {
 
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
+                  <span className="text-muted-foreground">{t('media.progress')}</span>
                   <span className="font-medium text-foreground">{project.progress}%</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -139,13 +160,22 @@ export default function Media() {
               </div>
 
               {project.status !== 'completed' && canManage('media') && (
-                <button 
-                  onClick={() => handleAdvanceStatus(project.id)}
-                  className="w-full h-9 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 flex items-center justify-center gap-2 transition-colors"
-                >
-                  Advance to Next Stage
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleAdvanceStatus(project.id)}
+                    className="flex-1 h-9 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {t('media.advanceStatus')}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleMarkComplete(project.id)}
+                    className="h-9 px-4 bg-success/10 text-success font-medium rounded-lg hover:bg-success/20 flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                    {t('media.markComplete')}
+                  </button>
+                </div>
               )}
             </div>
           );

@@ -126,6 +126,18 @@ export interface Folder {
   count: number;
 }
 
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  assigneeId: string;
+  assigneeName: string;
+  dueDate: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'in_progress' | 'completed';
+  createdAt: string;
+}
+
 // Initial data
 const initialClients: Client[] = [
   {
@@ -372,6 +384,14 @@ const initialFolders: Folder[] = [
   { id: '6', name: 'Autres', category: 'other', count: 23 },
 ];
 
+const initialTasks: Task[] = [
+  { id: '1', title: 'Finaliser le montage vidéo MTN', description: 'Terminer le montage final et exporter en 4K', assigneeId: '2', assigneeName: 'Marie Nguefack', dueDate: '2024-12-30', priority: 'high', status: 'in_progress', createdAt: '2024-12-25' },
+  { id: '2', title: 'Préparer le brief client', description: 'Rédiger le brief pour le nouveau projet Startup Hub', assigneeId: '3', assigneeName: 'Paul Mbarga', dueDate: '2024-12-28', priority: 'medium', status: 'pending', createdAt: '2024-12-25' },
+  { id: '3', title: 'Review design landing page', description: 'Vérifier les maquettes de la landing page', assigneeId: '4', assigneeName: 'Aisha Bello', dueDate: '2024-12-27', priority: 'low', status: 'completed', createdAt: '2024-12-24' },
+  { id: '4', title: 'Mixage audio podcast', description: 'Mixer l\'épisode 45 du podcast', assigneeId: '5', assigneeName: 'Emmanuel Fotso', dueDate: '2024-12-26', priority: 'high', status: 'pending', createdAt: '2024-12-23' },
+  { id: '5', title: 'Mettre à jour les réseaux sociaux', description: 'Publier les stories et posts de la semaine', assigneeId: '6', assigneeName: 'Grace Njoya', dueDate: '2024-12-30', priority: 'medium', status: 'in_progress', createdAt: '2024-12-25' },
+];
+
 // Store interface
 interface AppState {
   // Data
@@ -386,6 +406,7 @@ interface AppState {
   departments: Department[];
   documents: Document[];
   folders: Folder[];
+  tasks: Task[];
 
   // Client actions
   addClient: (client: Omit<Client, 'id' | 'createdAt' | 'lastContact'>) => void;
@@ -429,6 +450,11 @@ interface AppState {
   // Document actions
   addDocument: (document: Omit<Document, 'id'>) => void;
   deleteDocument: (id: string) => void;
+
+  // Task actions
+  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  updateTask: (id: string, updates: Partial<Task>) => void;
+  deleteTask: (id: string) => void;
 }
 
 // Generate unique ID
@@ -447,6 +473,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   departments: initialDepartments,
   documents: initialDocuments,
   folders: initialFolders,
+  tasks: initialTasks,
 
   // Client actions
   addClient: (client) => {
@@ -769,5 +796,32 @@ export const useAppStore = create<AppState>((set, get) => ({
         type: 'info',
       });
     }
+  },
+
+  // Task actions
+  addTask: (task) => {
+    const newTask: Task = {
+      ...task,
+      id: generateId(),
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    set((state) => ({ tasks: [...state.tasks, newTask] }));
+    get().addNotification({
+      title: 'Tâche Assignée',
+      message: `${newTask.title} assignée à ${newTask.assigneeName}`,
+      type: 'success',
+    });
+  },
+
+  updateTask: (id, updates) => {
+    set((state) => ({
+      tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+    }));
+  },
+
+  deleteTask: (id) => {
+    set((state) => ({
+      tasks: state.tasks.filter((t) => t.id !== id),
+    }));
   },
 }));

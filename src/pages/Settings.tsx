@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Settings as SettingsIcon,
   Globe,
   Palette,
   Bell,
@@ -39,11 +38,11 @@ export default function Settings() {
   });
 
   const handleSaveGeneral = () => {
-    toast.success(language === 'fr' ? 'Paramètres enregistrés' : 'Settings saved');
+    toast.success(t('settings.settingsSaved'));
   };
 
   const handleSaveNotifications = () => {
-    toast.success(language === 'fr' ? 'Préférences de notification mises à jour' : 'Notification preferences updated');
+    toast.success(t('settings.notificationPrefsUpdated'));
   };
 
   return (
@@ -77,9 +76,7 @@ export default function Settings() {
                 {t('settings.companyInfo')}
               </CardTitle>
               <CardDescription>
-                {language === 'fr' 
-                  ? 'Configurez les informations de base de votre entreprise'
-                  : 'Configure your company basic information'}
+                {t('settings.configureBasicInfo')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -157,9 +154,7 @@ export default function Settings() {
                 {t('settings.appearance')}
               </CardTitle>
               <CardDescription>
-                {language === 'fr' 
-                  ? 'Personnalisez l\'apparence de la plateforme'
-                  : 'Customize the platform appearance'}
+                {t('settings.customizeAppearance')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -189,19 +184,19 @@ export default function Settings() {
 
               {/* Theme Colors Preview */}
               <div className="space-y-3">
-                <Label>{language === 'fr' ? 'Couleurs du thème' : 'Theme Colors'}</Label>
+                <Label>{t('settings.themeColors')}</Label>
                 <div className="flex gap-3">
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-background border border-border">
                     <div className="w-6 h-6 rounded-full bg-foreground"></div>
-                    <span className="text-sm">{language === 'fr' ? 'Noir' : 'Black'}</span>
+                    <span className="text-sm">{t('settings.black')}</span>
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
                     <div className="w-6 h-6 rounded-full bg-primary"></div>
-                    <span className="text-sm">{language === 'fr' ? 'Jaune' : 'Yellow'}</span>
+                    <span className="text-sm">{t('settings.yellow')}</span>
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
                     <div className="w-6 h-6 rounded-full bg-card border border-border"></div>
-                    <span className="text-sm">{language === 'fr' ? 'Blanc' : 'White'}</span>
+                    <span className="text-sm">{t('settings.white')}</span>
                   </div>
                 </div>
               </div>
@@ -218,9 +213,7 @@ export default function Settings() {
                 {t('settings.notifications')}
               </CardTitle>
               <CardDescription>
-                {language === 'fr' 
-                  ? 'Gérez vos préférences de notification'
-                  : 'Manage your notification preferences'}
+                {t('settings.manageNotificationPrefs')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -229,7 +222,7 @@ export default function Settings() {
                   <div>
                     <p className="font-medium">{t('settings.emailNotifications')}</p>
                     <p className="text-sm text-muted-foreground">
-                      {language === 'fr' ? 'Recevoir des notifications par email' : 'Receive notifications via email'}
+                      {t('settings.receiveEmailNotifs')}
                     </p>
                   </div>
                   <Switch
@@ -242,7 +235,7 @@ export default function Settings() {
                   <div>
                     <p className="font-medium">{t('settings.pushNotifications')}</p>
                     <p className="text-sm text-muted-foreground">
-                      {language === 'fr' ? 'Notifications push dans le navigateur' : 'Push notifications in browser'}
+                      {t('settings.pushNotifsInBrowser')}
                     </p>
                   </div>
                   <Switch
@@ -253,9 +246,9 @@ export default function Settings() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
                   <div>
-                    <p className="font-medium">{language === 'fr' ? 'Alertes de réservation' : 'Booking Alerts'}</p>
+                    <p className="font-medium">{t('settings.bookingAlerts')}</p>
                     <p className="text-sm text-muted-foreground">
-                      {language === 'fr' ? 'Nouvelles réservations d\'espaces' : 'New space bookings'}
+                      {t('settings.newSpaceBookings')}
                     </p>
                   </div>
                   <Switch
@@ -266,9 +259,9 @@ export default function Settings() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
                   <div>
-                    <p className="font-medium">{language === 'fr' ? 'Alertes de paiement' : 'Payment Alerts'}</p>
+                    <p className="font-medium">{t('settings.paymentAlerts')}</p>
                     <p className="text-sm text-muted-foreground">
-                      {language === 'fr' ? 'Paiements et transactions' : 'Payments and transactions'}
+                      {t('settings.paymentsTransactions')}
                     </p>
                   </div>
                   <Switch
@@ -279,9 +272,9 @@ export default function Settings() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
                   <div>
-                    <p className="font-medium">{language === 'fr' ? 'Mises à jour de projets' : 'Project Updates'}</p>
+                    <p className="font-medium">{t('settings.projectUpdates')}</p>
                     <p className="text-sm text-muted-foreground">
-                      {language === 'fr' ? 'Changements de statut des projets' : 'Project status changes'}
+                      {t('settings.projectStatusChanges')}
                     </p>
                   </div>
                   <Switch
@@ -308,17 +301,13 @@ export default function Settings() {
                 {t('settings.security')}
               </CardTitle>
               <CardDescription>
-                {language === 'fr' 
-                  ? 'Paramètres de sécurité et d\'accès'
-                  : 'Security and access settings'}
+                {t('settings.securityAccessSettings')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="p-4 rounded-lg bg-muted/30 border border-border">
                 <p className="text-sm text-muted-foreground">
-                  {language === 'fr' 
-                    ? 'Les paramètres de sécurité avancés seront disponibles après la connexion à Lovable Cloud.'
-                    : 'Advanced security settings will be available after connecting to Lovable Cloud.'}
+                  {t('settings.advancedSecurityInfo')}
                 </p>
               </div>
             </CardContent>

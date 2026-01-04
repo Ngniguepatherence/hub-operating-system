@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   Bell, 
-  Check, 
   CheckCheck,
   Info,
   AlertTriangle,
@@ -16,7 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function Notifications() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { notifications, markNotificationRead, markAllNotificationsRead } = useAppStore();
 
   const getIcon = (type: string) => {
@@ -39,10 +38,10 @@ export default function Notifications() {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
 
-    if (hours < 1) return t('common.loading').replace('...', '');
+    if (hours < 1) return language === 'fr' ? 'À l\'instant' : 'Just now';
     if (hours < 24) return `${hours}h`;
-    if (days < 7) return `${days}j`;
-    return date.toLocaleDateString();
+    if (days < 7) return `${days}${language === 'fr' ? 'j' : 'd'}`;
+    return date.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US');
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -58,7 +57,7 @@ export default function Notifications() {
           <div>
             <p className="text-sm text-muted-foreground">
               {unreadCount > 0 
-                ? `${unreadCount} ${unreadCount > 1 ? 'non lues' : 'non lue'}`
+                ? `${unreadCount} ${unreadCount > 1 ? t('notifications.unreadPlural') : t('notifications.unread')}`
                 : t('notifications.noNotifications')
               }
             </p>

@@ -44,6 +44,7 @@ export const translations = {
     thisMonth: { fr: 'Ce mois', en: 'This Month' },
     dragOrClick: { fr: 'Cliquez ou glissez un fichier', en: 'Click or drag a file' },
     fillRequired: { fr: 'Veuillez remplir tous les champs requis', en: 'Please fill in all required fields' },
+    inProgress: { fr: 'En cours', en: 'In Progress' },
   },
 
   // Auth
@@ -125,13 +126,15 @@ export const translations = {
     startup: { fr: 'Startup', en: 'Startup' },
     individual: { fr: 'Particulier', en: 'Individual' },
     prospect: { fr: 'Prospect', en: 'Prospect' },
-    deleteConfirm: { fr: 'Êtes-vous sûr de vouloir supprimer ce client ?', en: 'Are you sure you want to delete this client?' },
+    deleteConfirm: { fr: 'Êtes-vous sûr de vouloir supprimer cet élément ?', en: 'Are you sure you want to delete this item?' },
     totalClients: { fr: 'Total Clients', en: 'Total Clients' },
     ofTotal: { fr: 'du total', en: 'of total' },
     fromAllClients: { fr: 'De tous les clients', en: 'From all clients' },
     pendingConversion: { fr: 'Conversion en attente', en: 'Pending conversion' },
     prospects: { fr: 'Prospects', en: 'Prospects' },
     searchClients: { fr: 'Rechercher des clients...', en: 'Search clients...' },
+    clientAdded: { fr: 'Client ajouté avec succès', en: 'Client added successfully' },
+    clientDeleted: { fr: 'Client supprimé avec succès', en: 'Client deleted successfully' },
   },
 
   // Spaces
@@ -159,6 +162,7 @@ export const translations = {
     bookNow: { fr: 'Réserver', en: 'Book Now' },
     setAvailable: { fr: 'Disponible', en: 'Set Available' },
     access: { fr: 'Accès', en: 'Access' },
+    bookingCreated: { fr: 'Réservation créée avec succès', en: 'Booking created successfully' },
   },
 
   // Media
@@ -242,6 +246,7 @@ export const translations = {
     allPrograms: { fr: 'Tous les Programmes', en: 'All Programs' },
     allStatus: { fr: 'Tous les Statuts', en: 'All Status' },
     unassigned: { fr: 'Non assigné', en: 'Unassigned' },
+    studentEnrolled: { fr: 'Étudiant inscrit avec succès', en: 'Student enrolled successfully' },
   },
 
   // Finance
@@ -280,6 +285,10 @@ export const translations = {
     noApprovePermission: { fr: 'Vous n\'avez pas la permission d\'approuver les dépenses', en: 'You don\'t have permission to approve expenses' },
     noRejectPermission: { fr: 'Vous n\'avez pas la permission de rejeter les dépenses', en: 'You don\'t have permission to reject expenses' },
     exportFeature: { fr: 'Fonction d\'export bientôt disponible', en: 'Export feature coming soon' },
+    incomeRecorded: { fr: 'Revenu enregistré avec succès', en: 'Income recorded successfully' },
+    expenseRecorded: { fr: 'Dépense soumise pour approbation', en: 'Expense submitted for approval' },
+    reject: { fr: 'Rejeter', en: 'Reject' },
+    pendingLabel: { fr: 'en attente', en: 'pending' },
   },
 
   // HR & Team
@@ -319,6 +328,13 @@ export const translations = {
     tasksCompleted: { fr: 'Tâches Terminées', en: 'Tasks Completed' },
     tasksInProgress: { fr: 'Tâches en Cours', en: 'Tasks In Progress' },
     tasksPending: { fr: 'Tâches en Attente', en: 'Tasks Pending' },
+    employeeAdded: { fr: 'Employé ajouté avec succès', en: 'Employee added successfully' },
+    employeeDeleted: { fr: 'Employé supprimé', en: 'Employee deleted' },
+    overallPerformance: { fr: 'Performance Globale', en: 'Overall Performance' },
+    excellentPerformers: { fr: 'Excellents Performeurs', en: 'Excellent Performers' },
+    activeEmployees: { fr: 'Employés Actifs', en: 'Active Employees' },
+    tasksForDate: { fr: 'Tâches pour le', en: 'Tasks for' },
+    noTasksForDate: { fr: 'Aucune tâche pour cette date', en: 'No tasks for this date' },
   },
 
   // Documents
@@ -351,6 +367,10 @@ export const translations = {
     documentUploaded: { fr: 'Document téléversé avec succès', en: 'Document uploaded successfully' },
     selectFile: { fr: 'Sélectionner un fichier', en: 'Select a file' },
     fileSelected: { fr: 'Fichier sélectionné', en: 'File selected' },
+    dragOrClickToUpload: { fr: 'Cliquez ou glissez un fichier ici', en: 'Click or drag a file here' },
+    supportedFormats: { fr: 'Formats supportés: PDF, Word, Excel, Images', en: 'Supported formats: PDF, Word, Excel, Images' },
+    noFileSelected: { fr: 'Aucun fichier sélectionné', en: 'No file selected' },
+    pleaseSelectFile: { fr: 'Veuillez sélectionner un fichier', en: 'Please select a file' },
   },
 
   // Settings
@@ -412,6 +432,8 @@ export const translations = {
     system: { fr: 'Système', en: 'System' },
     student: { fr: 'Étudiant', en: 'Student' },
     hr: { fr: 'RH', en: 'HR' },
+    unread: { fr: 'non lue', en: 'unread' },
+    unreadPlural: { fr: 'non lues', en: 'unread' },
   },
 
   // West Digital Hub specific

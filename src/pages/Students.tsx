@@ -4,36 +4,35 @@ import {
   GraduationCap, 
   Users, 
   Award, 
-  Calendar, 
   Plus, 
   Search, 
   BookOpen, 
   TrendingUp,
-  Edit,
   Trash2,
   Mail,
   Phone,
-  MoreVertical
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { AddStudentDialog } from '@/components/dialogs/AddStudentDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { toast } from 'sonner';
 
 // WDH Training Programs based on business context
 const programs = [
-  { name: 'Digital Marketing', enrolled: 0, color: 'from-primary to-primary/50', description: 'Social media, SEO, content strategy' },
-  { name: 'Video Production', enrolled: 0, color: 'from-accent to-accent/50', description: 'Filming, editing, corporate videos' },
-  { name: 'Audio Engineering', enrolled: 0, color: 'from-success to-success/50', description: 'Recording, mixing, podcasts' },
-  { name: 'UI/UX Design', enrolled: 0, color: 'from-warning to-warning/50', description: 'User experience, interfaces' },
-  { name: 'Content Creation', enrolled: 0, color: 'from-info to-info/50', description: 'Writing, storytelling, branding' },
-  { name: 'Startup Mentorship', enrolled: 0, color: 'from-destructive to-destructive/50', description: 'Business development, pitching' },
+  { name: 'Digital Marketing', color: 'from-primary to-primary/50', description: 'Social media, SEO, content strategy' },
+  { name: 'Video Production', color: 'from-accent to-accent/50', description: 'Filming, editing, corporate videos' },
+  { name: 'Audio Engineering', color: 'from-success to-success/50', description: 'Recording, mixing, podcasts' },
+  { name: 'UI/UX Design', color: 'from-warning to-warning/50', description: 'User experience, interfaces' },
+  { name: 'Content Creation', color: 'from-info to-info/50', description: 'Writing, storytelling, branding' },
+  { name: 'Startup Mentorship', color: 'from-destructive to-destructive/50', description: 'Business development, pitching' },
 ];
 
 export default function Students() {
-  const { canManage, hasPermission } = usePermissions();
+  const { t } = useLanguage();
+  const { canManage } = usePermissions();
   const { students, updateStudent, deleteStudent } = useAppStore();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,22 +77,14 @@ export default function Students() {
     });
   }, [students, searchTerm, filterProgram, filterStatus]);
 
-  const handleUpdateProgress = (id: string, progress: number) => {
-    updateStudent(id, { 
-      progress: Math.min(100, Math.max(0, progress)),
-      status: progress >= 100 ? 'completed' : 'active'
-    });
-    toast.success('Student progress updated');
-  };
-
   const handleGraduate = (id: string) => {
     updateStudent(id, { progress: 100, status: 'completed' });
-    toast.success('Student graduated successfully!');
+    toast.success(t('students.studentGraduated'));
   };
 
   const handleActivate = (id: string) => {
     updateStudent(id, { status: 'active' });
-    toast.success('Student activated');
+    toast.success(t('students.studentActivated'));
   };
 
   const handleDeleteClick = (id: string) => {
@@ -104,13 +95,13 @@ export default function Students() {
   const confirmDelete = () => {
     if (selectedStudent) {
       deleteStudent(selectedStudent);
-      toast.success('Student removed from program');
+      toast.success(t('students.studentRemoved'));
       setSelectedStudent(null);
     }
   };
 
   return (
-    <DashboardLayout title="Student Programs" subtitle="One foot in school, one foot in the professional world">
+    <DashboardLayout title={t('students.title')} subtitle={t('students.subtitle')}>
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="flex flex-col sm:flex-row gap-3 flex-1">
@@ -118,7 +109,7 @@ export default function Students() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search students..."
+              placeholder={t('students.searchStudents')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-10 pl-10 pr-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -129,7 +120,7 @@ export default function Students() {
             onChange={(e) => setFilterProgram(e.target.value)}
             className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground"
           >
-            <option value="all">All Programs</option>
+            <option value="all">{t('students.allPrograms')}</option>
             {programs.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
@@ -139,10 +130,10 @@ export default function Students() {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
+            <option value="all">{t('students.allStatus')}</option>
+            <option value="active">{t('common.active')}</option>
+            <option value="pending">{t('common.pending')}</option>
+            <option value="completed">{t('common.completed')}</option>
           </select>
         </div>
         {canManageStudents && (
@@ -151,7 +142,7 @@ export default function Students() {
             className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
-            Enroll Student
+            {t('students.enrollStudent')}
           </button>
         )}
       </div>
@@ -164,9 +155,9 @@ export default function Students() {
               <Users className="w-5 h-5 text-primary" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Active Students</p>
+          <p className="text-sm text-muted-foreground">{t('students.activeStudents')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{stats.active}</p>
-          <p className="text-xs text-success mt-1">+{stats.pending} pending</p>
+          <p className="text-xs text-success mt-1">+{stats.pending} {t('common.pending').toLowerCase()}</p>
         </div>
 
         <div className="glass-card p-5">
@@ -175,9 +166,9 @@ export default function Students() {
               <Award className="w-5 h-5 text-success" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Graduated</p>
+          <p className="text-sm text-muted-foreground">{t('students.graduated')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{stats.completed}</p>
-          <p className="text-xs text-muted-foreground mt-1">Alumni network</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('students.alumniNetwork')}</p>
         </div>
 
         <div className="glass-card p-5">
@@ -186,7 +177,7 @@ export default function Students() {
               <BookOpen className="w-5 h-5 text-warning" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Active Programs</p>
+          <p className="text-sm text-muted-foreground">{t('students.activePrograms')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{programs.length}</p>
         </div>
 
@@ -196,15 +187,15 @@ export default function Students() {
               <TrendingUp className="w-5 h-5 text-accent" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Avg. Progress</p>
+          <p className="text-sm text-muted-foreground">{t('students.avgProgress')}</p>
           <p className="text-2xl font-bold text-foreground mt-1">{stats.avgProgress}%</p>
-          <p className="text-xs text-success mt-1">Program completion</p>
+          <p className="text-xs text-success mt-1">{t('students.programCompletion')}</p>
         </div>
       </div>
 
       {/* Programs Overview */}
       <div className="glass-card p-4 md:p-6 mb-6">
-        <h3 className="font-semibold text-foreground mb-4">WDH Training Programs</h3>
+        <h3 className="font-semibold text-foreground mb-4">{t('students.trainingPrograms')}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
           {programsWithEnrollment.map((program) => (
             <div 
@@ -220,7 +211,7 @@ export default function Students() {
               </div>
               <p className="text-xs md:text-sm font-medium text-foreground line-clamp-2">{program.name}</p>
               <p className="text-xl md:text-2xl font-bold text-foreground mt-1">{program.enrolled}</p>
-              <p className="text-[10px] md:text-xs text-muted-foreground">students</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">{t('students.students')}</p>
             </div>
           ))}
         </div>
@@ -229,27 +220,27 @@ export default function Students() {
       {/* Students Table - Desktop */}
       <div className="glass-card overflow-hidden hidden lg:block">
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">Students ({filteredStudents.length})</h3>
+          <h3 className="font-semibold text-foreground">{t('students.activeStudents')} ({filteredStudents.length})</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Student</th>
-                <th>Program</th>
-                <th>University</th>
-                <th>Duration</th>
-                <th>Progress</th>
-                <th>Mentor</th>
-                <th>Status</th>
-                {canManageStudents && <th className="text-center">Actions</th>}
+                <th>{t('common.name')}</th>
+                <th>{t('students.program')}</th>
+                <th>{t('students.university')}</th>
+                <th>{t('students.duration')}</th>
+                <th>{t('media.progress')}</th>
+                <th>{t('students.mentor')}</th>
+                <th>{t('common.status')}</th>
+                {canManageStudents && <th className="text-center">{t('common.actions')}</th>}
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length === 0 ? (
                 <tr>
                   <td colSpan={canManageStudents ? 8 : 7} className="text-center text-muted-foreground py-8">
-                    No students found
+                    {t('students.noStudentsFound')}
                   </td>
                 </tr>
               ) : (
@@ -289,14 +280,16 @@ export default function Students() {
                         <span className="text-sm text-muted-foreground">{student.progress}%</span>
                       </div>
                     </td>
-                    <td className="text-muted-foreground">{student.mentor || 'Unassigned'}</td>
+                    <td className="text-muted-foreground">{student.mentor || t('students.unassigned')}</td>
                     <td>
                       <span className={cn(
                         student.status === 'active' && 'badge-success',
                         student.status === 'completed' && 'badge-info',
                         student.status === 'pending' && 'badge-warning'
                       )}>
-                        {student.status}
+                        {student.status === 'active' ? t('common.active') : 
+                         student.status === 'completed' ? t('common.completed') : 
+                         t('common.pending')}
                       </span>
                     </td>
                     {canManageStudents && (
@@ -313,7 +306,7 @@ export default function Students() {
                             <a
                               href={`tel:${student.phone}`}
                               className="p-2 rounded-lg hover:bg-success/10 text-muted-foreground hover:text-success transition-colors"
-                              title="Call"
+                              title={t('common.phone')}
                             >
                               <Phone className="w-4 h-4" />
                             </a>
@@ -323,7 +316,7 @@ export default function Students() {
                               onClick={() => handleActivate(student.id)}
                               className="px-2 py-1 rounded text-xs bg-success/10 text-success hover:bg-success/20"
                             >
-                              Activate
+                              {t('students.activate')}
                             </button>
                           )}
                           {student.status === 'active' && student.progress < 100 && (
@@ -331,13 +324,13 @@ export default function Students() {
                               onClick={() => handleGraduate(student.id)}
                               className="px-2 py-1 rounded text-xs bg-primary/10 text-primary hover:bg-primary/20"
                             >
-                              Graduate
+                              {t('students.graduate')}
                             </button>
                           )}
                           <button
                             onClick={() => handleDeleteClick(student.id)}
                             className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                            title="Remove"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -354,10 +347,10 @@ export default function Students() {
 
       {/* Students Cards - Mobile */}
       <div className="lg:hidden space-y-4">
-        <h3 className="font-semibold text-foreground">Students ({filteredStudents.length})</h3>
+        <h3 className="font-semibold text-foreground">{t('students.activeStudents')} ({filteredStudents.length})</h3>
         {filteredStudents.length === 0 ? (
           <div className="glass-card p-6 text-center text-muted-foreground">
-            No students found
+            {t('students.noStudentsFound')}
           </div>
         ) : (
           filteredStudents.map((student) => (
@@ -379,72 +372,63 @@ export default function Students() {
                   student.status === 'completed' && 'badge-info',
                   student.status === 'pending' && 'badge-warning'
                 )}>
-                  {student.status}
+                  {student.status === 'active' ? t('common.active') : 
+                   student.status === 'completed' ? t('common.completed') : 
+                   t('common.pending')}
                 </span>
               </div>
               
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">University</span>
+                  <span className="text-muted-foreground">{t('students.university')}</span>
                   <span className="text-foreground">{student.university}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Mentor</span>
-                  <span className="text-foreground">{student.mentor || 'Unassigned'}</span>
+                  <span className="text-muted-foreground">{t('students.mentor')}</span>
+                  <span className="text-foreground">{student.mentor || t('students.unassigned')}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span className="text-foreground">{student.startDate} - {student.endDate}</span>
-                </div>
-              </div>
-              
-              <div className="mt-3 pt-3 border-t border-border/50">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Progress</span>
-                  <span className="text-sm font-medium text-foreground">{student.progress}%</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className={cn(
-                      "h-full rounded-full transition-all",
-                      student.progress >= 100 
-                        ? "bg-success" 
-                        : "bg-gradient-to-r from-primary to-accent"
-                    )}
-                    style={{ width: `${student.progress}%` }}
-                  />
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">{t('media.progress')}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full",
+                          student.progress >= 100 
+                            ? "bg-success" 
+                            : "bg-gradient-to-r from-primary to-accent"
+                        )}
+                        style={{ width: `${student.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-foreground">{student.progress}%</span>
+                  </div>
                 </div>
               </div>
 
               {canManageStudents && (
-                <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
-                  <a
-                    href={`mailto:${student.email}`}
-                    className="flex-1 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium text-center hover:bg-primary/20"
-                  >
-                    Email
-                  </a>
+                <div className="flex gap-2 mt-4 pt-3 border-t border-border">
                   {student.status === 'pending' && (
                     <button
                       onClick={() => handleActivate(student.id)}
-                      className="flex-1 py-2 rounded-lg bg-success/10 text-success text-sm font-medium hover:bg-success/20"
+                      className="flex-1 py-2 rounded-lg text-sm bg-success/10 text-success hover:bg-success/20"
                     >
-                      Activate
+                      {t('students.activate')}
                     </button>
                   )}
                   {student.status === 'active' && student.progress < 100 && (
                     <button
                       onClick={() => handleGraduate(student.id)}
-                      className="flex-1 py-2 rounded-lg bg-accent/10 text-accent text-sm font-medium hover:bg-accent/20"
+                      className="flex-1 py-2 rounded-lg text-sm bg-primary/10 text-primary hover:bg-primary/20"
                     >
-                      Graduate
+                      {t('students.graduate')}
                     </button>
                   )}
                   <button
                     onClick={() => handleDeleteClick(student.id)}
-                    className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    className="py-2 px-4 rounded-lg text-sm bg-destructive/10 text-destructive hover:bg-destructive/20"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    {t('common.delete')}
                   </button>
                 </div>
               )}
@@ -453,16 +437,12 @@ export default function Students() {
         )}
       </div>
 
-      {/* Dialogs */}
-      <AddStudentDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-      />
+      <AddStudentDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Remove Student"
-        description="Are you sure you want to remove this student from the program? This action cannot be undone."
+        title={t('common.confirm')}
+        description={t('crm.deleteConfirm')}
         onConfirm={confirmDelete}
         variant="destructive"
       />

@@ -8,18 +8,16 @@ import {
   ArrowDownRight,
   Plus,
   Download,
-  Filter,
   Check,
   X,
   Trash2,
-  Eye,
-  FileText
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { AddTransactionDialog } from '@/components/dialogs/AddTransactionDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { toast } from 'sonner';
@@ -45,7 +43,8 @@ const revenueByService = [
 
 export default function Finance() {
   const { user } = useAuth();
-  const { canManage, canApproveExpenses, hasPermission } = usePermissions();
+  const { t } = useLanguage();
+  const { canManage, canApproveExpenses } = usePermissions();
   const { transactions, approveTransaction, deleteTransaction } = useAppStore();
   
   const [incomeDialogOpen, setIncomeDialogOpen] = useState(false);
@@ -79,30 +78,30 @@ export default function Finance() {
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => {
-      if (filterType !== 'all' && t.type !== filterType) return false;
-      if (filterStatus !== 'all' && t.status !== filterStatus) return false;
+    return transactions.filter(tx => {
+      if (filterType !== 'all' && tx.type !== filterType) return false;
+      if (filterStatus !== 'all' && tx.status !== filterStatus) return false;
       return true;
     });
   }, [transactions, filterType, filterStatus]);
 
   const handleApprove = (id: string) => {
     if (!canApproveExpenses()) {
-      toast.error("You don't have permission to approve expenses");
+      toast.error(t('finance.noApprovePermission'));
       return;
     }
     const roleName = user?.role === 'ceo' ? 'CEO' : 'COO';
     approveTransaction(id, roleName);
-    toast.success('Expense approved successfully');
+    toast.success(t('finance.expenseApproved'));
   };
 
   const handleReject = (id: string) => {
     if (!canApproveExpenses()) {
-      toast.error("You don't have permission to reject expenses");
+      toast.error(t('finance.noRejectPermission'));
       return;
     }
     deleteTransaction(id);
-    toast.success('Expense rejected and removed');
+    toast.success(t('finance.expenseRejected'));
   };
 
   const handleDeleteClick = (id: string) => {
@@ -113,7 +112,7 @@ export default function Finance() {
   const confirmDelete = () => {
     if (selectedTransaction) {
       deleteTransaction(selectedTransaction);
-      toast.success('Transaction deleted');
+      toast.success(t('finance.transactionDeleted'));
       setSelectedTransaction(null);
     }
   };
@@ -121,7 +120,7 @@ export default function Finance() {
   const canManageFinance = canManage('finance');
 
   return (
-    <DashboardLayout title="Finance & Invoicing" subtitle="Revenue, expenses and cash flow management">
+    <DashboardLayout title={t('finance.title')} subtitle={t('finance.subtitle')}>
       {/* Header Actions */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-wrap gap-3">
@@ -130,26 +129,26 @@ export default function Finance() {
             onChange={(e) => setFilterType(e.target.value as typeof filterType)}
             className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground"
           >
-            <option value="all">All Types</option>
-            <option value="income">Income Only</option>
-            <option value="expense">Expenses Only</option>
+            <option value="all">{t('finance.allTypes')}</option>
+            <option value="income">{t('finance.incomeOnly')}</option>
+            <option value="expense">{t('finance.expensesOnly')}</option>
           </select>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
             className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="completed">Completed</option>
+            <option value="all">{t('finance.allStatus')}</option>
+            <option value="pending">{t('common.pending')}</option>
+            <option value="approved">{t('common.approved')}</option>
+            <option value="completed">{t('common.completed')}</option>
           </select>
           <button 
-            onClick={() => toast.info('Export feature coming soon')}
+            onClick={() => toast.info(t('finance.exportFeature'))}
             className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
-            Export
+            {t('common.export')}
           </button>
         </div>
         {canManageFinance && (
@@ -159,14 +158,14 @@ export default function Finance() {
               className="h-10 px-4 bg-success/10 text-success border border-success/30 font-medium rounded-lg flex items-center gap-2 hover:bg-success/20 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              New Invoice
+              {t('finance.addIncome')}
             </button>
             <button 
               onClick={() => setExpenseDialogOpen(true)}
               className="h-10 px-4 bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
-              Record Expense
+              {t('finance.addExpense')}
             </button>
           </div>
         )}
@@ -184,7 +183,7 @@ export default function Finance() {
               +18.2%
             </span>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Total Revenue</p>
+          <p className="text-xs md:text-sm text-muted-foreground">{t('finance.totalRevenue')}</p>
           <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.totalIncome.toLocaleString()}</p>
         </div>
 
@@ -198,7 +197,7 @@ export default function Finance() {
               +5.1%
             </span>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Total Expenses</p>
+          <p className="text-xs md:text-sm text-muted-foreground">{t('finance.totalExpenses')}</p>
           <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.totalExpenses.toLocaleString()}</p>
         </div>
 
@@ -212,7 +211,7 @@ export default function Finance() {
               +22.4%
             </span>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Net Profit</p>
+          <p className="text-xs md:text-sm text-muted-foreground">{t('finance.netProfit')}</p>
           <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.netProfit.toLocaleString()}</p>
         </div>
 
@@ -222,9 +221,9 @@ export default function Finance() {
               <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-warning" />
             </div>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">Pending Approval</p>
+          <p className="text-xs md:text-sm text-muted-foreground">{t('finance.pendingApproval')}</p>
           <p className="text-lg md:text-2xl font-bold text-foreground mt-1">${stats.pendingExpenses.toLocaleString()}</p>
-          <p className="text-[10px] md:text-xs text-warning mt-1">{stats.pendingCount} expenses awaiting</p>
+          <p className="text-[10px] md:text-xs text-warning mt-1">{stats.pendingCount} {t('finance.expensesAwaiting')}</p>
         </div>
       </div>
 
@@ -232,7 +231,7 @@ export default function Finance() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
         {/* Cash Flow Chart */}
         <div className="lg:col-span-2 glass-card p-4 md:p-6">
-          <h3 className="font-semibold text-foreground mb-4">Cash Flow</h3>
+          <h3 className="font-semibold text-foreground mb-4">{t('finance.cashFlow')}</h3>
           <div className="h-48 md:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={cashflowData}>
@@ -265,7 +264,7 @@ export default function Finance() {
 
         {/* Revenue by Service */}
         <div className="glass-card p-4 md:p-6">
-          <h3 className="font-semibold text-foreground mb-4">Revenue by Service</h3>
+          <h3 className="font-semibold text-foreground mb-4">{t('finance.revenueByService')}</h3>
           <div className="h-40 md:h-48">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -303,29 +302,29 @@ export default function Finance() {
       {canApproveExpenses() && (
         <div className="glass-card overflow-hidden mb-6">
           <div className="p-6 border-b border-border flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Pending Expense Approvals</h3>
-            <span className="badge-warning">{transactions.filter(t => t.status === 'pending').length} pending</span>
+            <h3 className="font-semibold text-foreground">{t('finance.pendingExpenseApprovals')}</h3>
+            <span className="badge-warning">{transactions.filter(tx => tx.status === 'pending').length} {t('finance.pendingLabel')}</span>
           </div>
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Description</th>
-                  <th>Category</th>
-                  <th>Date</th>
-                  <th className="text-right">Amount</th>
-                  <th className="text-center">Actions</th>
+                  <th>{t('finance.description')}</th>
+                  <th>{t('finance.category')}</th>
+                  <th>{t('common.date')}</th>
+                  <th className="text-right">{t('finance.amount')}</th>
+                  <th className="text-center">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.filter(t => t.status === 'pending').length === 0 ? (
+                {transactions.filter(tx => tx.status === 'pending').length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center text-muted-foreground py-8">
-                      No pending expenses to approve
+                      {t('finance.noPendingExpenses')}
                     </td>
                   </tr>
                 ) : (
-                  transactions.filter(t => t.status === 'pending').map((tx) => (
+                  transactions.filter(tx => tx.status === 'pending').map((tx) => (
                     <tr key={tx.id}>
                       <td className="font-medium text-foreground">{tx.description}</td>
                       <td className="text-muted-foreground">{tx.category}</td>
@@ -338,14 +337,14 @@ export default function Finance() {
                           <button
                             onClick={() => handleApprove(tx.id)}
                             className="p-2 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors"
-                            title="Approve"
+                            title={t('finance.approve')}
                           >
                             <Check className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleReject(tx.id)}
                             className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-                            title="Reject"
+                            title={t('finance.reject')}
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -363,25 +362,25 @@ export default function Finance() {
       {/* Recent Transactions - Desktop */}
       <div className="glass-card overflow-hidden hidden lg:block">
         <div className="p-6 border-b border-border">
-          <h3 className="font-semibold text-foreground">All Transactions</h3>
+          <h3 className="font-semibold text-foreground">{t('finance.allTransactions')}</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th className="text-right">Amount</th>
-                {canManageFinance && <th className="text-center">Actions</th>}
+                <th>{t('finance.description')}</th>
+                <th>{t('finance.category')}</th>
+                <th>{t('common.date')}</th>
+                <th>{t('common.status')}</th>
+                <th className="text-right">{t('finance.amount')}</th>
+                {canManageFinance && <th className="text-center">{t('common.actions')}</th>}
               </tr>
             </thead>
             <tbody>
               {filteredTransactions.length === 0 ? (
                 <tr>
                   <td colSpan={canManageFinance ? 6 : 5} className="text-center text-muted-foreground py-8">
-                    No transactions found
+                    {t('finance.noTransactionsFound')}
                   </td>
                 </tr>
               ) : (
@@ -396,7 +395,9 @@ export default function Finance() {
                         tx.status === 'pending' && 'badge-warning',
                         tx.status === 'approved' && 'badge-info'
                       )}>
-                        {tx.status}
+                        {tx.status === 'completed' ? t('common.completed') : 
+                         tx.status === 'pending' ? t('common.pending') : 
+                         t('common.approved')}
                         {tx.approvedBy && ` (${tx.approvedBy})`}
                       </span>
                     </td>
@@ -408,11 +409,11 @@ export default function Finance() {
                     </td>
                     {canManageFinance && (
                       <td>
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center">
                           <button
                             onClick={() => handleDeleteClick(tx.id)}
                             className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                            title="Delete"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -427,18 +428,18 @@ export default function Finance() {
         </div>
       </div>
 
-      {/* Transactions Cards - Mobile */}
+      {/* Mobile Cards */}
       <div className="lg:hidden space-y-4">
-        <h3 className="font-semibold text-foreground">All Transactions</h3>
+        <h3 className="font-semibold text-foreground">{t('finance.allTransactions')}</h3>
         {filteredTransactions.length === 0 ? (
           <div className="glass-card p-6 text-center text-muted-foreground">
-            No transactions found
+            {t('finance.noTransactionsFound')}
           </div>
         ) : (
           filteredTransactions.map((tx) => (
             <div key={tx.id} className="glass-card p-4">
               <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
+                <div>
                   <p className="font-medium text-foreground">{tx.description}</p>
                   <p className="text-sm text-muted-foreground">{tx.category}</p>
                 </div>
@@ -447,65 +448,32 @@ export default function Finance() {
                   tx.status === 'pending' && 'badge-warning',
                   tx.status === 'approved' && 'badge-info'
                 )}>
-                  {tx.status}
+                  {tx.status === 'completed' ? t('common.completed') : 
+                   tx.status === 'pending' ? t('common.pending') : 
+                   t('common.approved')}
                 </span>
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-border/50">
+              <div className="flex items-center justify-between pt-3 border-t border-border">
                 <span className="text-sm text-muted-foreground">{tx.date}</span>
                 <span className={cn(
-                  'font-semibold',
+                  'font-bold',
                   tx.type === 'income' ? 'text-success' : 'text-destructive'
                 )}>
                   {tx.type === 'income' ? '+' : '-'}${tx.amount.toLocaleString()}
                 </span>
               </div>
-              {canManageFinance && (
-                <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
-                  {tx.status === 'pending' && canApproveExpenses() && (
-                    <>
-                      <button
-                        onClick={() => handleApprove(tx.id)}
-                        className="flex-1 py-2 rounded-lg bg-success/10 text-success text-sm font-medium hover:bg-success/20"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleReject(tx.id)}
-                        className="flex-1 py-2 rounded-lg bg-destructive/10 text-destructive text-sm font-medium hover:bg-destructive/20"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => handleDeleteClick(tx.id)}
-                    className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
             </div>
           ))
         )}
       </div>
 
-      {/* Dialogs */}
-      <AddTransactionDialog
-        open={incomeDialogOpen}
-        onOpenChange={setIncomeDialogOpen}
-        type="income"
-      />
-      <AddTransactionDialog
-        open={expenseDialogOpen}
-        onOpenChange={setExpenseDialogOpen}
-        type="expense"
-      />
+      <AddTransactionDialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen} type="income" />
+      <AddTransactionDialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen} type="expense" />
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Transaction"
-        description="Are you sure you want to delete this transaction? This action cannot be undone."
+        title={t('common.confirm')}
+        description={t('crm.deleteConfirm')}
         onConfirm={confirmDelete}
         variant="destructive"
       />

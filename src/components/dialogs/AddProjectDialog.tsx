@@ -112,7 +112,7 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
                     <SelectValue placeholder="Internal Project" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Internal Project</SelectItem>
+                    <SelectItem value="internal">Internal Project</SelectItem>
                     {clients.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
                         {client.name}

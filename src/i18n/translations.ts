@@ -76,14 +76,17 @@ export const translations = {
   // Navigation
   nav: {
     dashboard: { fr: 'Tableau de bord', en: 'Dashboard' },
-    crm: { fr: 'CRM', en: 'CRM' },
+    crm: { fr: 'Gestion Clients', en: 'Client Management' },
     spaces: { fr: 'Espaces', en: 'Spaces' },
+    media: { fr: 'Production Média', en: 'Media Production' },
     mediaProduction: { fr: 'Production Média', en: 'Media Production' },
     audio: { fr: 'Audio', en: 'Audio' },
     video: { fr: 'Vidéo', en: 'Video' },
     podcasts: { fr: 'Podcasts', en: 'Podcasts' },
+    students: { fr: 'Programmes Étudiants', en: 'Student Programs' },
     studentPrograms: { fr: 'Programmes Étudiants', en: 'Student Programs' },
-    finance: { fr: 'Finance', en: 'Finance' },
+    finance: { fr: 'Finances', en: 'Finances' },
+    hr: { fr: 'RH & Équipe', en: 'HR & Team' },
     hrTeam: { fr: 'RH & Équipe', en: 'HR & Team' },
     documents: { fr: 'Documents', en: 'Documents' },
     notifications: { fr: 'Notifications', en: 'Notifications' },
@@ -135,6 +138,11 @@ export const translations = {
     searchClients: { fr: 'Rechercher des clients...', en: 'Search clients...' },
     clientAdded: { fr: 'Client ajouté avec succès', en: 'Client added successfully' },
     clientDeleted: { fr: 'Client supprimé avec succès', en: 'Client deleted successfully' },
+    exportClients: { fr: 'Exporter Clients', en: 'Export Clients' },
+    importClients: { fr: 'Importer Clients', en: 'Import Clients' },
+    clientsExported: { fr: 'Clients exportés avec succès', en: 'Clients exported successfully' },
+    clientsImported: { fr: 'Clients importés avec succès', en: 'Clients imported successfully' },
+    importError: { fr: 'Erreur lors de l\'importation', en: 'Import error' },
   },
 
   // Spaces
@@ -163,6 +171,13 @@ export const translations = {
     setAvailable: { fr: 'Disponible', en: 'Set Available' },
     access: { fr: 'Accès', en: 'Access' },
     bookingCreated: { fr: 'Réservation créée avec succès', en: 'Booking created successfully' },
+    hasBookings: { fr: 'Jour avec réservations', en: 'Day with bookings' },
+    bookingsFor: { fr: 'Réservations du', en: 'Bookings for' },
+    reservation: { fr: 'réservation', en: 'reservation' },
+    noBookingsForDate: { fr: 'Aucune réservation pour cette date', en: 'No bookings for this date' },
+    total: { fr: 'Total', en: 'Total' },
+    listView: { fr: 'Vue Liste', en: 'List View' },
+    exportBookings: { fr: 'Exporter Réservations', en: 'Export Bookings' },
   },
 
   // Media

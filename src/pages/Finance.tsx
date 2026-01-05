@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AddTransactionDialog } from '@/components/dialogs/AddTransactionDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
+import { exportToCSV } from '@/utils/exportData';
 import { toast } from 'sonner';
 
 const cashflowData = [
@@ -117,6 +118,18 @@ export default function Finance() {
     }
   };
 
+  const handleExportTransactions = () => {
+    exportToCSV(transactions, `transactions_${new Date().toISOString().split('T')[0]}`, [
+      { key: 'description', label: 'Description' },
+      { key: 'type', label: 'Type' },
+      { key: 'category', label: 'Catégorie' },
+      { key: 'amount', label: 'Montant' },
+      { key: 'date', label: 'Date' },
+      { key: 'status', label: 'Statut' },
+    ]);
+    toast.success(t('common.export') + ' ✓');
+  };
+
   const canManageFinance = canManage('finance');
 
   return (
@@ -144,7 +157,7 @@ export default function Finance() {
             <option value="completed">{t('common.completed')}</option>
           </select>
           <button 
-            onClick={() => toast.info(t('finance.exportFeature'))}
+            onClick={handleExportTransactions}
             className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2"
           >
             <Download className="w-4 h-4" />

@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Plus, Search, Filter, MoreHorizontal, Mail, Phone, Building, Trash2, Edit } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+import { Plus, Search, Filter, MoreHorizontal, Mail, Phone, Building, Trash2, Edit, Download, Upload } from 'lucide-react';
+import { useAppStore, Client } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AddClientDialog } from '@/components/dialogs/AddClientDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
+import { exportToCSV, importFromCSV } from '@/utils/exportData';
 import { toast } from 'sonner';
 
 const typeStyles = {
@@ -22,12 +23,13 @@ const statusStyles = {
 
 export default function CRM() {
   const { t } = useLanguage();
-  const { clients, deleteClient } = useAppStore();
+  const { clients, deleteClient, addClient } = useAppStore();
   const { canManage } = usePermissions();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredClients = clients.filter(client => 
     client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,8 +76,78 @@ export default function CRM() {
     }
   };
 
+  const handleExportClients = () => {
+    exportToCSV(clients, `clients_${new Date().toISOString().split('T')[0]}`, [
+      { key: 'name', label: 'Nom' },
+      { key: 'company', label: 'Entreprise' },
+      { key: 'email', label: 'Email' },
+      { key: 'phone', label: 'Téléphone' },
+      { key: 'type', label: 'Type' },
+      { key: 'status', label: 'Statut' },
+      { key: 'revenue', label: 'Revenu' },
+    ]);
+    toast.success(t('crm.clientsExported'));
+  };
+
+  const handleImportClients = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const imported = await importFromCSV<Client>(file, [
+        { csvHeader: 'Nom', key: 'name' },
+        { csvHeader: 'name', key: 'name' },
+        { csvHeader: 'Entreprise', key: 'company' },
+        { csvHeader: 'company', key: 'company' },
+        { csvHeader: 'Email', key: 'email' },
+        { csvHeader: 'email', key: 'email' },
+        { csvHeader: 'Téléphone', key: 'phone' },
+        { csvHeader: 'phone', key: 'phone' },
+        { csvHeader: 'Type', key: 'type' },
+        { csvHeader: 'type', key: 'type' },
+        { csvHeader: 'Statut', key: 'status' },
+        { csvHeader: 'status', key: 'status' },
+        { csvHeader: 'Revenu', key: 'revenue' },
+        { csvHeader: 'revenue', key: 'revenue' },
+      ]);
+
+      let importedCount = 0;
+      for (const client of imported) {
+        if (client.name && client.email) {
+          addClient({
+            name: client.name,
+            company: client.company || '',
+            email: client.email,
+            phone: client.phone || '',
+            type: (client.type as 'enterprise' | 'startup' | 'individual') || 'individual',
+            status: (client.status as 'active' | 'prospect' | 'inactive') || 'prospect',
+            revenue: Number(client.revenue) || 0,
+          });
+          importedCount++;
+        }
+      }
+
+      toast.success(`${importedCount} ${t('crm.clientsImported')}`);
+    } catch (error) {
+      toast.error(t('crm.importError'));
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <DashboardLayout title={t('crm.title')} subtitle={t('crm.subtitle')}>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImportClients}
+        accept=".csv"
+        className="hidden"
+      />
+      
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="flex gap-3">
           <div className="relative flex-1 sm:w-80">
@@ -88,6 +160,22 @@ export default function CRM() {
               className="w-full h-10 pl-10 pr-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
+          <button 
+            onClick={handleExportClients}
+            className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            {t('common.export')}
+          </button>
+          {canManage('clients') && (
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              {t('crm.importClients')}
+            </button>
+          )}
         </div>
         {canManage('clients') && (
           <button 

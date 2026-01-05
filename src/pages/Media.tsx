@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Plus, Filter, Calendar, User, ArrowRight, CheckCircle, Check } from 'lucide-react';
+import { Plus, Filter, Calendar, User, ArrowRight, CheckCircle, Check, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AddProjectDialog } from '@/components/dialogs/AddProjectDialog';
+import { exportToCSV } from '@/utils/exportData';
 import { toast } from 'sonner';
 
 export default function Media() {
@@ -58,6 +59,20 @@ export default function Media() {
     toast.success(t('media.projectCompleted'));
   };
 
+  const handleExportProjects = () => {
+    exportToCSV(projects, `projets_media_${new Date().toISOString().split('T')[0]}`, [
+      { key: 'title', label: 'Titre' },
+      { key: 'client', label: 'Client' },
+      { key: 'type', label: 'Type' },
+      { key: 'status', label: 'Statut' },
+      { key: 'deadline', label: 'Échéance' },
+      { key: 'budget', label: 'Budget' },
+      { key: 'progress', label: 'Progression' },
+      { key: 'assignee', label: 'Assigné' },
+    ]);
+    toast.success(t('common.export') + ' ✓');
+  };
+
   const activeProjects = projects.filter(p => p.status !== 'completed').length;
   const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
 
@@ -68,6 +83,13 @@ export default function Media() {
           <button className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2">
             <Filter className="w-4 h-4" />
             {t('media.filterByType')}
+          </button>
+          <button 
+            onClick={handleExportProjects}
+            className="h-10 px-4 bg-muted/50 border border-border rounded-lg text-sm text-foreground hover:bg-muted flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            {t('common.export')}
           </button>
         </div>
         {canManage('media') && (

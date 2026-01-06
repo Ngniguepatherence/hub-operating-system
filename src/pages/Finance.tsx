@@ -11,6 +11,7 @@ import {
   Check,
   X,
   Trash2,
+  FileText,
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
@@ -20,7 +21,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AddTransactionDialog } from '@/components/dialogs/AddTransactionDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
+import { InvoiceDialog } from '@/components/dialogs/InvoiceDialog';
 import { exportToCSV } from '@/utils/exportData';
+import { createInvoiceFromTransaction } from '@/utils/generateInvoice';
+import { InvoiceData } from '@/components/invoice/InvoiceTemplate';
 import { toast } from 'sonner';
 
 const cashflowData = [
@@ -46,11 +50,13 @@ export default function Finance() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { canManage, canApproveExpenses } = usePermissions();
-  const { transactions, approveTransaction, deleteTransaction } = useAppStore();
+  const { transactions, clients, approveTransaction, deleteTransaction } = useAppStore();
   
   const [incomeDialogOpen, setIncomeDialogOpen] = useState(false);
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState<InvoiceData | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'completed'>('all');
@@ -128,6 +134,22 @@ export default function Finance() {
       { key: 'status', label: 'Statut' },
     ]);
     toast.success(t('common.export') + ' ✓');
+  };
+
+  const handleGenerateInvoice = (tx: typeof transactions[0]) => {
+    // Find a client that matches the transaction description
+    const matchedClient = clients.find(c => 
+      tx.description.toLowerCase().includes(c.company.toLowerCase()) ||
+      tx.description.toLowerCase().includes(c.name.toLowerCase())
+    );
+    
+    const invoice = createInvoiceFromTransaction(
+      tx,
+      matchedClient?.name || 'Client',
+      matchedClient?.company
+    );
+    setCurrentInvoice(invoice);
+    setInvoiceDialogOpen(true);
   };
 
   const canManageFinance = canManage('finance');
@@ -422,7 +444,16 @@ export default function Finance() {
                     </td>
                     {canManageFinance && (
                       <td>
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center justify-center gap-1">
+                          {tx.type === 'income' && (
+                            <button
+                              onClick={() => handleGenerateInvoice(tx)}
+                              className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                              title={t('invoice.generate')}
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteClick(tx.id)}
                             className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
@@ -482,6 +513,11 @@ export default function Finance() {
 
       <AddTransactionDialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen} type="income" />
       <AddTransactionDialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen} type="expense" />
+      <InvoiceDialog 
+        open={invoiceDialogOpen} 
+        onOpenChange={setInvoiceDialogOpen} 
+        invoiceData={currentInvoice}
+      />
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

@@ -466,6 +466,29 @@ export const translations = {
     },
     copyright: { fr: '© 2024 West Digital Hub. Tous droits réservés.', en: '© 2024 West Digital Hub. All rights reserved.' },
   },
+
+  // Invoice
+  invoice: {
+    title: { fr: 'Facture', en: 'Invoice' },
+    preview: { fr: 'Aperçu de la facture', en: 'Invoice Preview' },
+    generate: { fr: 'Générer facture', en: 'Generate Invoice' },
+    print: { fr: 'Imprimer', en: 'Print' },
+    download: { fr: 'Télécharger PDF', en: 'Download PDF' },
+    invoiceNumber: { fr: 'N° Facture', en: 'Invoice No.' },
+    client: { fr: 'Client', en: 'Client' },
+    date: { fr: 'Date', en: 'Date' },
+    description: { fr: 'Description', en: 'Description' },
+    quantity: { fr: 'Qté', en: 'Qty' },
+    unitPrice: { fr: 'Prix unitaire', en: 'Unit Price' },
+    total: { fr: 'Total', en: 'Total' },
+    subtotal: { fr: 'Sous-total', en: 'Subtotal' },
+    tax: { fr: 'Taxe', en: 'Tax' },
+    totalToPay: { fr: 'Total à payer', en: 'Total to Pay' },
+    paymentMethod: { fr: 'Méthode de paiement', en: 'Payment Method' },
+    terms: { fr: 'Conditions', en: 'Terms and Conditions' },
+    selectClient: { fr: 'Sélectionner un client', en: 'Select a client' },
+    noClientSelected: { fr: 'Veuillez sélectionner un client', en: 'Please select a client' },
+  },
 };
 
 export function t(key: string, language: Language): string {

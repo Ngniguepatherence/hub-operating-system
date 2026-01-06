@@ -1,16 +1,21 @@
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, Booking } from '@/stores/appStore';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
-import { Clock, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, MapPin, User, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { InvoiceDialog } from '@/components/dialogs/InvoiceDialog';
+import { createInvoiceFromBooking } from '@/utils/generateInvoice';
+import { InvoiceData } from '@/components/invoice/InvoiceTemplate';
 
 export function BookingCalendar() {
   const { t, language } = useLanguage();
   const { spaces, bookings } = useAppStore();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState<InvoiceData | null>(null);
   const locale = language === 'fr' ? fr : enUS;
 
   // Get bookings for selected date
@@ -62,6 +67,19 @@ export function BookingCalendar() {
       default:
         return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const handleGenerateInvoice = (booking: typeof allBookingsForDate[0]) => {
+    const invoice = createInvoiceFromBooking({
+      spaceName: booking.spaceName,
+      clientName: booking.clientName,
+      date: booking.date,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      totalPrice: booking.totalPrice
+    });
+    setCurrentInvoice(invoice);
+    setInvoiceDialogOpen(true);
   };
 
   return (
@@ -137,12 +155,25 @@ export function BookingCalendar() {
                   <span className="text-xs text-muted-foreground">
                     {t('spaces.total') || 'Total'}: ${booking.totalPrice}
                   </span>
+                  <button
+                    onClick={() => handleGenerateInvoice(booking)}
+                    className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                    title={t('invoice.generate')}
+                  >
+                    <FileText className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <InvoiceDialog 
+        open={invoiceDialogOpen} 
+        onOpenChange={setInvoiceDialogOpen} 
+        invoiceData={currentInvoice}
+      />
     </div>
   );
 }

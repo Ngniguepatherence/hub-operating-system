@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Plus, Users, Clock, DollarSign, Calendar, List, Download } from 'lucide-react';
+import { Plus, Users, Clock, DollarSign, Calendar, List, Download, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, Booking } from '@/stores/appStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AddBookingDialog } from '@/components/dialogs/AddBookingDialog';
 import { BookingCalendar } from '@/components/spaces/BookingCalendar';
+import { InvoiceDialog } from '@/components/dialogs/InvoiceDialog';
 import { exportToCSV } from '@/utils/exportData';
+import { createInvoiceFromBooking } from '@/utils/generateInvoice';
+import { InvoiceData } from '@/components/invoice/InvoiceTemplate';
 import { toast } from 'sonner';
 
 export default function Spaces() {
@@ -16,6 +19,8 @@ export default function Spaces() {
   const { canManage } = usePermissions();
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState<InvoiceData | null>(null);
 
   const todayBookings = spaces.filter(s => s.status === 'occupied' || s.status === 'reserved').length;
   const occupancyRate = Math.round((todayBookings / spaces.length) * 100);
@@ -103,6 +108,19 @@ export default function Spaces() {
       { key: 'totalPrice', label: 'Prix' }
     ]);
     toast.success(t('common.export') + ' ✓');
+  };
+
+  const handleGenerateInvoice = (booking: Booking) => {
+    const invoice = createInvoiceFromBooking({
+      spaceName: booking.spaceName,
+      clientName: booking.clientName,
+      date: booking.date,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      totalPrice: booking.totalPrice
+    });
+    setCurrentInvoice(invoice);
+    setInvoiceDialogOpen(true);
   };
 
   return (
@@ -237,6 +255,11 @@ export default function Spaces() {
       )}
 
       <AddBookingDialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen} />
+      <InvoiceDialog 
+        open={invoiceDialogOpen} 
+        onOpenChange={setInvoiceDialogOpen} 
+        invoiceData={currentInvoice}
+      />
     </DashboardLayout>
   );
 }

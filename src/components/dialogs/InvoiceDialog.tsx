@@ -1,9 +1,11 @@
 import { useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { InvoiceTemplate, InvoiceData } from '@/components/invoice/InvoiceTemplate';
 import { Printer, Download } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface InvoiceDialogProps {
   open: boolean;
@@ -171,6 +173,38 @@ export function InvoiceDialog({ open, onOpenChange, invoiceData }: InvoiceDialog
     }, 250);
   };
 
+  const handleDownloadPDF = async () => {
+    if (!invoiceRef.current) return;
+
+    try {
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 10;
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`Facture_${invoiceData?.invoiceNumber}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
   if (!invoiceData) return null;
 
   return (
@@ -184,8 +218,15 @@ export function InvoiceDialog({ open, onOpenChange, invoiceData }: InvoiceDialog
                 <Printer className="w-4 h-4 mr-2" />
                 {t('invoice.print')}
               </Button>
+              <Button onClick={handleDownloadPDF} size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                {t('invoice.download')}
+              </Button>
             </div>
           </DialogTitle>
+          <DialogDescription>
+            {t('invoice.preview')}
+          </DialogDescription>
         </DialogHeader>
         
         <div className="border rounded-lg overflow-hidden bg-white">

@@ -488,6 +488,13 @@ export const translations = {
     terms: { fr: 'Conditions', en: 'Terms and Conditions' },
     selectClient: { fr: 'Sélectionner un client', en: 'Select a client' },
     noClientSelected: { fr: 'Veuillez sélectionner un client', en: 'Please select a client' },
+    pdfGenerated: { fr: 'PDF généré avec succès', en: 'PDF generated successfully' },
+  },
+  
+  // Document viewer
+  documentViewer: {
+    previewNotAvailable: { fr: 'Aperçu non disponible pour ce type de fichier', en: 'Preview not available for this file type' },
+    clickToDownload: { fr: 'Cliquez pour télécharger', en: 'Click to download' },
   },
 };
 

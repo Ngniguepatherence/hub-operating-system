@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, Document as DocumentType } from '@/stores/appStore';
 import { UploadDocumentDialog } from '@/components/dialogs/UploadDocumentDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
+import { DocumentViewerDialog } from '@/components/dialogs/DocumentViewerDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +14,6 @@ import {
   Search, 
   Plus, 
   FileText, 
-  Folder, 
   Download, 
   Trash2, 
   Eye,
@@ -46,7 +46,9 @@ export default function Documents() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
 
   const canManageDocuments = canManage('documents');
 
@@ -93,16 +95,21 @@ export default function Documents() {
   };
 
   const handleDelete = (id: string) => {
-    setSelectedDocument(id);
+    setSelectedDocumentId(id);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (selectedDocument) {
-      deleteDocument(selectedDocument);
+    if (selectedDocumentId) {
+      deleteDocument(selectedDocumentId);
       setDeleteDialogOpen(false);
-      setSelectedDocument(null);
+      setSelectedDocumentId(null);
     }
+  };
+
+  const handleViewDocument = (doc: DocumentType) => {
+    setSelectedDocument(doc);
+    setViewerOpen(true);
   };
 
   const formatFileSize = (bytes: number) => {
@@ -173,13 +180,21 @@ export default function Documents() {
           <Card key={doc.id} className="glass-card hover:border-primary/30 transition-all">
             <CardContent className="p-4">
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-muted/50">
+                <div 
+                  className="p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                  onClick={() => handleViewDocument(doc)}
+                >
                   {getFileIcon(doc.type)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <h3 className="font-medium text-foreground truncate">{doc.name}</h3>
+                      <h3 
+                        className="font-medium text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleViewDocument(doc)}
+                      >
+                        {doc.name}
+                      </h3>
                       <p className="text-sm text-muted-foreground">{formatFileSize(doc.size)}</p>
                     </div>
                     <DropdownMenu>
@@ -189,7 +204,7 @@ export default function Documents() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDocument(doc)}>
                           <Eye className="w-4 h-4 mr-2" /> {t('common.view')}
                         </DropdownMenuItem>
                         <DropdownMenuItem>
@@ -234,6 +249,12 @@ export default function Documents() {
         title={t('common.confirm')}
         description={t('crm.deleteConfirm')}
         onConfirm={confirmDelete}
+      />
+
+      <DocumentViewerDialog
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        document={selectedDocument}
       />
     </DashboardLayout>
   );

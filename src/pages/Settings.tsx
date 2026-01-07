@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,12 +14,15 @@ import {
   Bell,
   Shield,
   Building2,
-  Save
+  Save,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
   
   const [companySettings, setCompanySettings] = useState({
     name: 'West Digital Hub',
@@ -182,13 +186,39 @@ export default function Settings() {
                 </div>
               </div>
 
+              {/* Theme Mode */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                  {t('settings.theme')}
+                </Label>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant={theme === 'light' ? 'default' : 'outline'}
+                    onClick={() => setTheme('light')}
+                    className="flex-1 min-w-[120px] gap-2"
+                  >
+                    <Sun className="w-4 h-4" />
+                    {t('settings.lightMode')}
+                  </Button>
+                  <Button
+                    variant={theme === 'dark' ? 'default' : 'outline'}
+                    onClick={() => setTheme('dark')}
+                    className="flex-1 min-w-[120px] gap-2"
+                  >
+                    <Moon className="w-4 h-4" />
+                    {t('settings.darkMode')}
+                  </Button>
+                </div>
+              </div>
+
               {/* Theme Colors Preview */}
               <div className="space-y-3">
                 <Label>{t('settings.themeColors')}</Label>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-background border border-border">
                     <div className="w-6 h-6 rounded-full bg-foreground"></div>
-                    <span className="text-sm">{t('settings.black')}</span>
+                    <span className="text-sm">{theme === 'dark' ? t('settings.white') : t('settings.black')}</span>
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
                     <div className="w-6 h-6 rounded-full bg-primary"></div>
@@ -196,7 +226,7 @@ export default function Settings() {
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
                     <div className="w-6 h-6 rounded-full bg-card border border-border"></div>
-                    <span className="text-sm">{t('settings.white')}</span>
+                    <span className="text-sm">{theme === 'dark' ? t('settings.black') : t('settings.white')}</span>
                   </div>
                 </div>
               </div>

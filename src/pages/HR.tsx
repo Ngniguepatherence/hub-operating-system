@@ -7,6 +7,8 @@ import { AddEmployeeDialog } from '@/components/dialogs/AddEmployeeDialog';
 import { ConfirmDialog } from '@/components/dialogs/ConfirmDialog';
 import { TeamCalendar } from '@/components/hr/TeamCalendar';
 import { PerformanceTracker } from '@/components/hr/PerformanceTracker';
+import { PayrollCalculator } from '@/components/hr/PayrollCalculator';
+import { TaxManagement } from '@/components/hr/TaxManagement';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,7 +26,9 @@ import {
   UserCheck,
   UserX,
   Trash2,
-  TrendingUp
+  TrendingUp,
+  Calculator,
+  Receipt
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -111,10 +115,12 @@ export default function HR() {
 
       {/* Tabs */}
       <Tabs defaultValue="team" className="space-y-6">
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="team" className="gap-2"><Users className="w-4 h-4" />{t('hr.employees')}</TabsTrigger>
-          <TabsTrigger value="calendar" className="gap-2"><Calendar className="w-4 h-4" />{t('hr.calendar')}</TabsTrigger>
-          <TabsTrigger value="performance" className="gap-2"><TrendingUp className="w-4 h-4" />{t('hr.performance')}</TabsTrigger>
+        <TabsList className="bg-muted/50 flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="team" className="gap-2"><Users className="w-4 h-4" /><span className="hidden sm:inline">{t('hr.employees')}</span></TabsTrigger>
+          <TabsTrigger value="payroll" className="gap-2"><Calculator className="w-4 h-4" /><span className="hidden sm:inline">{t('hr.payroll')}</span></TabsTrigger>
+          <TabsTrigger value="tax" className="gap-2"><Receipt className="w-4 h-4" /><span className="hidden sm:inline">{t('hr.fiscal')}</span></TabsTrigger>
+          <TabsTrigger value="calendar" className="gap-2"><Calendar className="w-4 h-4" /><span className="hidden sm:inline">{t('hr.calendar')}</span></TabsTrigger>
+          <TabsTrigger value="performance" className="gap-2"><TrendingUp className="w-4 h-4" /><span className="hidden sm:inline">{t('hr.performance')}</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="team">
@@ -181,6 +187,8 @@ export default function HR() {
           {filteredEmployees.length === 0 && (<div className="text-center py-12"><Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">{t('common.noData')}</p></div>)}
         </TabsContent>
 
+        <TabsContent value="payroll"><PayrollCalculator /></TabsContent>
+        <TabsContent value="tax"><TaxManagement /></TabsContent>
         <TabsContent value="calendar"><TeamCalendar /></TabsContent>
         <TabsContent value="performance"><PerformanceTracker /></TabsContent>
       </Tabs>

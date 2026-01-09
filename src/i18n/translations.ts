@@ -45,9 +45,6 @@ export const translations = {
     dragOrClick: { fr: 'Cliquez ou glissez un fichier', en: 'Click or drag a file' },
     fillRequired: { fr: 'Veuillez remplir tous les champs requis', en: 'Please fill in all required fields' },
     inProgress: { fr: 'En cours', en: 'In Progress' },
-    back: { fr: 'Retour', en: 'Back' },
-    viewAll: { fr: 'Voir tout', en: 'View All' },
-    logout: { fr: 'Déconnexion', en: 'Logout' },
   },
 
   // Auth
@@ -580,7 +577,6 @@ export const translations = {
   documentViewer: {
     previewNotAvailable: { fr: 'Aperçu non disponible pour ce type de fichier', en: 'Preview not available for this file type' },
     clickToDownload: { fr: 'Cliquez pour télécharger', en: 'Click to download' },
-    openExternal: { fr: 'Ouvrir dans un nouvel onglet', en: 'Open in new tab' },
   },
 };
 

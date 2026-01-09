@@ -463,6 +463,11 @@ export const translations = {
     supportedFormats: { fr: 'Formats supportés: PDF, Word, Excel, Images', en: 'Supported formats: PDF, Word, Excel, Images' },
     noFileSelected: { fr: 'Aucun fichier sélectionné', en: 'No file selected' },
     pleaseSelectFile: { fr: 'Veuillez sélectionner un fichier', en: 'Please select a file' },
+    accessInfo: { fr: 'Accès basé sur votre rôle', en: 'Access based on your role' },
+    categoriesAccessible: { fr: 'catégories accessibles', en: 'categories accessible' },
+    restricted: { fr: 'Restreint', en: 'Restricted' },
+    recentDocuments: { fr: 'Documents récents', en: 'Recent Documents' },
+    viewAll: { fr: 'Voir tout', en: 'View All' },
   },
 
   // Settings

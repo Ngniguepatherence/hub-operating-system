@@ -21,6 +21,17 @@ type Permission =
   | 'view_settings'
   | 'manage_settings';
 
+// Document category permissions by role
+type DocumentCategory = 'contracts' | 'invoices' | 'reports' | 'templates' | 'policies' | 'other';
+
+const documentCategoryPermissions: Record<UserRole, DocumentCategory[]> = {
+  ceo: ['contracts', 'invoices', 'reports', 'templates', 'policies', 'other'],
+  coo: ['contracts', 'invoices', 'reports', 'templates', 'policies', 'other'],
+  cto: ['templates', 'policies', 'other'],
+  media_manager: ['templates', 'other'],
+  admin: ['invoices', 'templates', 'other'],
+};
+
 const rolePermissions: Record<UserRole, Permission[]> = {
   ceo: [
     'view_dashboard',
@@ -76,6 +87,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     'view_dashboard',
     'view_media',
     'manage_media',
+    'view_documents',
     'view_notifications',
   ],
   admin: [
@@ -115,12 +127,24 @@ export function usePermissions() {
     return hasPermission('approve_expenses');
   };
 
+  const canAccessDocumentCategory = (category: string): boolean => {
+    if (!user?.role) return false;
+    return documentCategoryPermissions[user.role].includes(category as DocumentCategory);
+  };
+
+  const getAccessibleDocumentCategories = (): DocumentCategory[] => {
+    if (!user?.role) return [];
+    return documentCategoryPermissions[user.role];
+  };
+
   return {
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
     canManage,
     canApproveExpenses,
+    canAccessDocumentCategory,
+    getAccessibleDocumentCategories,
     userRole: user?.role,
   };
 }

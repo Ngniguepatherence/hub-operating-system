@@ -1,14 +1,29 @@
 const express = require('express');
+const {
+  getTransactions,
+  getTransaction,
+  createTransaction,
+  updateTransaction,
+  approveTransaction,
+  deleteTransaction
+} = require('../controllers/transactionController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.use(protect);
 
-// TODO: Implement transaction routes
-router.get('/', (req, res) => {
-  res.json({ message: 'Transactions routes - to be implemented' });
-});
+router.route('/')
+  .get(getTransactions)
+  .post(createTransaction);
+
+router.route('/:id')
+  .get(getTransaction)
+  .put(updateTransaction)
+  .delete(deleteTransaction);
+
+router.route('/:id/approve')
+  .put(approveTransaction);
 
 module.exports = router;
 

@@ -1,14 +1,26 @@
 const express = require('express');
+const {
+  getDocuments,
+  getDocument,
+  uploadDocument,
+  deleteDocument,
+  uploadMiddleware
+} = require('../controllers/documentController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.use(protect);
 
-// TODO: Implement document routes with file upload
-router.get('/', (req, res) => {
-  res.json({ message: 'Documents routes - to be implemented' });
-});
+router.route('/')
+  .get(getDocuments);
+
+router.route('/upload')
+  .post(uploadMiddleware, uploadDocument);
+
+router.route('/:id')
+  .get(getDocument)
+  .delete(deleteDocument);
 
 module.exports = router;
 

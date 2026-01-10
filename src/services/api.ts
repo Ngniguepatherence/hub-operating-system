@@ -5,7 +5,7 @@
  * Update VITE_API_URL in your .env.local file to point to your backend.
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -59,6 +59,11 @@ class ApiService {
         throw new Error(data.message || `API Error: ${response.statusText}`);
       }
 
+      // For auth endpoints, return the full response object (includes token and user)
+      // For other endpoints, return just the data field
+      if (endpoint.includes('/auth/')) {
+        return data as T;
+      }
       return data.data as T;
     } catch (error) {
       if (error instanceof Error) {
@@ -70,33 +75,33 @@ class ApiService {
 
   // ==================== AUTH ====================
   
-  async login(email: string, password: string, role: string) {
-    const response = await this.request<{ token: string; user: any }>('/auth/login', {
+  async login(email: string, password: string) {
+    const response = await this.request<{ success: boolean; token: string; user: any }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ email, password }),
     });
     
-    // Note: The response structure might need adjustment based on your backend
-    if ('token' in response) {
+    if (response && response.token) {
       this.setToken(response.token);
     }
     return response;
   }
 
   async register(name: string, email: string, password: string, role: string) {
-    const response = await this.request<{ token: string; user: any }>('/auth/register', {
+    const response = await this.request<{ success: boolean; token: string; user: any }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ name, email, password, role }),
     });
     
-    if ('token' in response) {
+    if (response && response.token) {
       this.setToken(response.token);
     }
     return response;
   }
 
   async getCurrentUser() {
-    return this.request<any>('/auth/me');
+    const response = await this.request<{ success: boolean; user: any }>('/auth/me');
+    return response;
   }
 
   logout(): void {

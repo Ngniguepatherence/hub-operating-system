@@ -1,4 +1,11 @@
 const express = require('express');
+const {
+  getSpaces,
+  getSpace,
+  createSpace,
+  updateSpace,
+  deleteSpace
+} = require('../controllers/spaceController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -6,10 +13,14 @@ const router = express.Router();
 // All routes require authentication
 router.use(protect);
 
-// TODO: Implement space routes
-router.get('/', (req, res) => {
-  res.json({ message: 'Spaces routes - to be implemented' });
-});
+router.route('/')
+  .get(getSpaces)
+  .post(createSpace);
+
+router.route('/:id')
+  .get(getSpace)
+  .put(updateSpace)
+  .delete(deleteSpace);
 
 module.exports = router;
 

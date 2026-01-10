@@ -5,18 +5,18 @@ const User = require('../models/User');
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     // Validate email & password
-    if (!email || !password || !role) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email, password, and role'
+        message: 'Please provide email and password'
       });
     }
 
     // Check for user
-    const user = await User.findOne({ email, role }).select('+password');
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({

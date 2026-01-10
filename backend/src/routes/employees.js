@@ -1,14 +1,25 @@
 const express = require('express');
+const {
+  getEmployees,
+  getEmployee,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee
+} = require('../controllers/employeeController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.use(protect);
 
-// TODO: Implement employee routes
-router.get('/', (req, res) => {
-  res.json({ message: 'Employees routes - to be implemented' });
-});
+router.route('/')
+  .get(getEmployees)
+  .post(createEmployee);
+
+router.route('/:id')
+  .get(getEmployee)
+  .put(updateEmployee)
+  .delete(deleteEmployee);
 
 module.exports = router;
 
